@@ -291,18 +291,24 @@ const SimulationEngine = {
 
     if (snrSlider) {
       snrSlider.addEventListener('input', (e) => {
-        appState.simulationParams.snrDb = parseFloat(e.target.value);
+        let v = parseFloat(e.target.value);
+        if (v < 0) v = 0;
+        if (v > 30) v = 30;
+        e.target.value = v;
+        appState.simulationParams.snrDb = v;
         document.querySelector('[data-display="snr-value"]').textContent = 
-          `${e.target.value} dB`;
+          `${v} dB`;
         this.drawSimulation();
       });
     }
 
     if (amplitudeSlider) {
       amplitudeSlider.addEventListener('input', (e) => {
-        appState.simulationParams.amplitude = parseFloat(e.target.value);
+        let v = parseFloat(e.target.value);
+        // assuming amplitude bounds exist elsewhere
+        appState.simulationParams.amplitude = v;
         document.querySelector('[data-display="amplitude-value"]').textContent = 
-          `${e.target.value}`;
+          `${v}`;
         this.drawSimulation();
       });
     }
@@ -660,6 +666,29 @@ document.addEventListener('DOMContentLoaded', () => {
   TabNavigation.init();
   SimulationEngine.initializeSimulation();
   QuizSystem.renderQuiz();
+
+  // help panel toggling
+  const helpBtn = document.getElementById('helpBtn');
+  const helpContainer = document.getElementById('helpContainer');
+  const closeHelp = document.getElementById('closeHelp');
+
+  if (helpBtn && helpContainer && closeHelp) {
+    helpBtn.addEventListener('click', () => {
+      helpContainer.classList.remove('hidden');
+      helpContainer.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    closeHelp.addEventListener('click', () => {
+      helpContainer.classList.add('hidden');
+    });
+
+    // hide when clicking outside card
+    helpContainer.addEventListener('click', e => {
+      if (e.target === helpContainer) {
+        helpContainer.classList.add('hidden');
+      }
+    });
+  }
 });
 
 // ============================================================================

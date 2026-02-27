@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>QAM Virtual Laboratory — Full Simulation</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!-- FontAwesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="./qam.css">
 <script src="./qam.js" defer></script>
 
@@ -28,16 +30,62 @@ focusing on constellation behavior, time-domain waveforms, and BER/SER performan
     <button type="button" class="nav-btn" data-page="procedure">Procedure</button>
     <button type="button" class="nav-btn" data-page="pretest">Pre-Test</button>
      
-    <button type="button" class="nav-btn" data-page="blockdiag">Block Diagrams</button>
     <button type="button" class="nav-btn" data-page="simulation">Simulation</button>
     <button type="button" class="nav-btn" data-page="posttest">Post-Test</button>
-    <button type="button" class="nav-btn" data-page="faq">FAQ</button>
-    <button type="button" class="nav-btn" data-page="references">References</button>
+    <!-- FAQ removed per user request -->
+    <button type="button" class="nav-btn" data-page="results">Results</button>
+  </div>
+
+  <!-- HELP BUTTON -->
+  <button id="helpBtn" class="help-btn">
+      <i class="fas fa-lightbulb"></i> HELP
+  </button>
+
+  <!-- REFERENCE CONTAINER -->
+  <div id="helpContainer" class="help-container hidden">
+      <div class="help-card">
+          
+          <!-- HEADER -->
+          <div class="help-header">
+              <h2>Help & Reference</h2>
+              <span id="closeHelp" class="close-btn">&times;</span>
+          </div>
+
+          <!-- FLASHCARDS GRID -->
+          <div class="card-grid">
+              
+              <div class="flashcard">
+                  <span class="label">Frequency Range</span>
+                  <span class="value">1Hz – 10kHz</span>
+              </div>
+
+              <div class="flashcard">
+                  <span class="label">Amplitude</span>
+                  <span class="value">1V – 10V</span>
+              </div>
+
+              <div class="flashcard">
+                  <span class="label">Time/Div</span>
+                  <span class="value">0.1ms – 10ms</span>
+              </div>
+
+              <div class="flashcard">
+                  <span class="label">Volt/Div</span>
+                  <span class="value">1V – 5V</span>
+              </div>
+
+              <div class="flashcard">
+                  <span class="label">Example Input</span>
+                  <span class="value">f=1kHz, A=5V</span>
+              </div>
+
+          </div>
+      </div>
   </div>
 
   <!-- AIM -->
   <section id="aim" class="page active" role="region" aria-labelledby="aim">
-    <h2>🎯 Aim</h2>
+    <h2> Aim</h2>
 <p>
 To study Quadrature Amplitude Modulation (QAM) by visualizing
 constellation diagrams, time-domain waveforms, and evaluating Bit Error Rate (BER)
@@ -56,64 +104,55 @@ and Symbol Error Rate (SER) performance over an Additive White Gaussian Noise (A
 
   <!-- THEORY -->
   <section id="theory" class="page" role="region" aria-labelledby="theory">
-    <h2>📚 Theory</h2>
+    <h2> Theory</h2>
+
+    <h3>1. Introduction to Quadrature Amplitude Modulation</h3>
     <p>
-      Quadrature Amplitude Modulation (QAM) combines two amplitude-modulated carriers — an in-phase (I) and a quadrature (Q) component — to convey information. Each transmitted symbol corresponds to a point in a 2D constellation where the I axis represents cosine-weighted amplitude and the Q axis represents sine-weighted amplitude.
+      <keyword>Quadrature Amplitude Modulation</keyword> (QAM) is a sophisticated modulation scheme that communicates data by changing (modulating) the amplitudes of two carrier waves. These two waves, usually sinusoids, are out of phase with each other by 90° and are thus called <keyword>quadrature</keyword> components. QAM is widely used in modern digital telecommunications, including Wi‑Fi, cellular networks (LTE/5G), and cable modems, due to its high <keyword>spectral efficiency</keyword>.
     </p>
-    <p style="margin-top:8px;">
-      The number of constellation points, M, determines how many bits are conveyed per symbol: bits/symbol = log2(M). Higher M (e.g., 64-, 256-QAM) increases spectral efficiency but places points closer together, making them more susceptible to noise and impairments.
+
+    <h3>2. Mathematical Representation</h3>
+    <p>
+      A QAM signal can be expressed as a linear combination of two orthogonal basis functions:
+      <code>φ₁(t) = √(2/Tₛ) cos(2π f_c t)</code> and
+      <code>φ₂(t) = √(2/Tₛ) sin(2π f_c t)</code>.
+      The general form of the transmitted signal <code>s(t)</code> is:
     </p>
-    <p style="margin-top:8px;">
-      Important concepts:
+    <pre>
+      s(t) = A_i cos(2π f_c t + θ_i)
+           = I_n cos(2π f_c t) - Q_n sin(2π f_c t)
+    </pre>
+    <p>
+      Where:
+      <ul style="margin:4px 0 0 18px;">
+        <li><code>I_n</code> is the <keyword>In-phase</keyword> component.</li>
+        <li><code>Q_n</code> is the <keyword>Quadrature</keyword> component.</li>
+        <li><code>f_c</code> is the carrier frequency.</li>
+        <li><code>Tₛ</code> is the symbol duration.</li>
+      </ul>
     </p>
-    <ul style="margin:8px 0 0 18px;">
-      <li><strong>Symbol mapping:</strong> Bits are grouped and mapped to constellation indices. In this experiment, simple binary mapping is used for instructional clarity.</li>
-      <li><strong>AWGN:</strong> The primary impairment modeled here is white Gaussian noise, which perturbs I/Q samples and causes both symbol and bit errors.</li>
-      <li><strong>Demapping:</strong> At the receiver, nearest-neighbor decision rules are commonly used to map noisy samples back to symbol indices; this simple approach is effective for illustrating BER/SER trends.</li>
-      <li><strong>Tradeoffs:</strong> Increasing SNR improves error performance; increasing M increases data rate but requires higher SNR for the same error performance.</li>
-    </ul>
-   <p style="margin-top:8px;">
-  <em>Note:</em> For clarity and instructional purposes, this virtual laboratory uses
-  simple binary symbol mapping. Gray coding may be explored as an extension to study
-  its impact on BER performance.
-</p>
-  </section>
-
-  <!-- PROCEDURE -->
-  <section id="procedure" class="page" role="region" aria-labelledby="procedure">
-    <h2>📋 Procedure</h2>
-<ol>
-  <li>Select the modulation order (M) from the control panel.</li>
-  <li>Enter the number of input bits. The simulator automatically groups bits into symbols based on the selected modulation order.</li>
-  <li>
-For meaningful BER observation at high SNR, use a large number of bits
-(e.g., ≥10,000).
-</li>
-  <li>Adjust the Signal-to-Noise Ratio (SNR) in dB to simulate different channel conditions.</li>
-  <li>Set the carrier frequency and symbol rate. The symbol duration is automatically derived from the symbol rate.</li>
-  <li>At high SNR, BER may appear zero for small bit counts; increase the number of bits or reduce SNR to observe errors.</li>
-  <li>Click <b>Run Simulation</b> to observe the constellation diagram, time-domain waveform, and BER/SER values.</li>
-  <li>Repeat the experiment by varying SNR and modulation order to study performance trade-offs.</li>
-</ol>
-    <p style="margin-top:8px;">
-      Tips:
+    <p>
+      For an <em>M</em>-ary QAM system, the number of bits per symbol <code>k</code> is given by:
     </p>
-    <ul style="margin:8px 0 0 18px;">
-      <li>Use the constellation plot to see clustering around ideal points and to visually estimate decision regions.</li>
-      <li>Compare the bit comparison block to quickly find the first mismatches between transmitted and received bits.</li>
-      <li>For a demonstration or presentation, record BER/SER values as you sweep SNR to create performance curves offline.</li>
-    </ul>
-  </section>
+    <pre>
+      k = log₂(M)
+    </pre>
+    <p>
+      For example, in 16‑QAM each symbol represents 4 bits, while in 64‑QAM each symbol represents 6 bits.
+    </p>
 
-  <!-- BLOCK DIAGRAMS - New section -->
-  <section id="blockdiag" class="page" role="region" aria-labelledby="blockdiag">
-    <h2>🧩 Block Diagrams, Formulas & Applications</h2>
-    <p class="small-muted" style="margin-top:6px;">
-  The block diagrams shown below are simplified representations intended to highlight
-  the functional signal flow in QAM systems rather than implementation-level details.
-</p>
+    <h3>3. Block Diagram</h3>
+    <p>
+      The implementation of QAM requires precise phase synchronization between the transmitter and the receiver.
+    </p>
+    <!-- inserted photo of QAM transmitter/receiver -->
+    <div class="theory-image-container" style="text-align:center; margin:12px 0;">
+      <img src="./block-diagram.png" alt="QAM transmitter and receiver block diagram" style="max-width:100%; height:auto;" />
+      <div class="small-muted" style="font-size:0.9rem; margin-top:4px;">Figure: Simplified QAM transmitter / receiver block diagram</div>
+    </div>
+    
 
-
+    <!-- Begin block diagrams excerpt from separate page -->
     <div class="bd-section">
       <!-- Left: Block diagrams for each modulation -->
       <div class="bd-card">
@@ -124,20 +163,15 @@ For meaningful BER observation at high SNR, use a large number of bits
           <div>
             <div style="font-weight:700;margin-bottom:6px">4-QAM </div>
             <div class="bd-diagram" aria-hidden="true">
-              <!-- simple illustrative SVG -->
               <svg width="320" height="60" viewBox="0 0 320 60" xmlns="http://www.w3.org/2000/svg">
                 <rect x="6" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="38" y="35" font-size="11" text-anchor="middle" fill="#222">Bit Source</text>
-
                 <rect x="80" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="112" y="35" font-size="11" text-anchor="middle" fill="#222">Mapper</text>
-
                 <rect x="154" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="186" y="35" font-size="11" text-anchor="middle" fill="#222">I/Q Modulator</text>
-
                 <rect x="228" y="10" width="84" height="40" rx="6" fill="#fff" stroke="#ffeede"/>
                 <text x="270" y="35" font-size="11" text-anchor="middle" fill="#222">AWGN Channel</text>
-
                 <line x1="70" y1="30" x2="80" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="144" y1="30" x2="154" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="218" y1="30" x2="228" y2="30" stroke="#ffdac6" stroke-width="2"/>
@@ -156,16 +190,12 @@ For meaningful BER observation at high SNR, use a large number of bits
               <svg width="320" height="60" viewBox="0 0 320 60" xmlns="http://www.w3.org/2000/svg">
                 <rect x="6" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="38" y="35" font-size="11" text-anchor="middle" fill="#222">Source</text>
-
                 <rect x="80" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="112" y="35" font-size="11" text-anchor="middle" fill="#222">Gray Mapper</text>
-
                 <rect x="154" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="186" y="35" font-size="11" text-anchor="middle" fill="#222">Pulse Shaper</text>
-
                 <rect x="228" y="10" width="84" height="40" rx="6" fill="#fff" stroke="#ffeede"/>
                 <text x="270" y="35" font-size="11" text-anchor="middle" fill="#222">RF & Channel</text>
-
                 <line x1="70" y1="30" x2="80" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="144" y1="30" x2="154" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="218" y1="30" x2="228" y2="30" stroke="#ffdac6" stroke-width="2"/>
@@ -184,16 +214,12 @@ For meaningful BER observation at high SNR, use a large number of bits
               <svg width="320" height="60" viewBox="0 0 320 60" xmlns="http://www.w3.org/2000/svg">
                 <rect x="6" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="38" y="35" font-size="11" text-anchor="middle" fill="#222">Source</text>
-
                 <rect x="80" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="112" y="35" font-size="11" text-anchor="middle" fill="#222">Encoder / Mapper</text>
-
                 <rect x="154" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="186" y="35" font-size="11" text-anchor="middle" fill="#222">Matched Filter</text>
-
                 <rect x="228" y="10" width="84" height="40" rx="6" fill="#fff" stroke="#ffeede"/>
                 <text x="270" y="35" font-size="11" text-anchor="middle" fill="#222">RF & Channel</text>
-
                 <line x1="70" y1="30" x2="80" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="144" y1="30" x2="154" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="218" y1="30" x2="228" y2="30" stroke="#ffdac6" stroke-width="2"/>
@@ -212,16 +238,12 @@ For meaningful BER observation at high SNR, use a large number of bits
               <svg width="320" height="60" viewBox="0 0 320 60" xmlns="http://www.w3.org/2000/svg">
                 <rect x="6" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="38" y="35" font-size="11" text-anchor="middle" fill="#222">Source</text>
-
                 <rect x="80" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="112" y="35" font-size="11" text-anchor="middle" fill="#222">FEC / Mapper</text>
-
                 <rect x="154" y="10" width="64" height="40" rx="6" fill="#fff" stroke="#e6eefc"/>
                 <text x="186" y="35" font-size="11" text-anchor="middle" fill="#222">Pulse Shaping</text>
-
                 <rect x="228" y="10" width="84" height="40" rx="6" fill="#fff" stroke="#ffeede"/>
                 <text x="270" y="35" font-size="11" text-anchor="middle" fill="#222">RF & Channel</text>
-
                 <line x1="70" y1="30" x2="80" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="144" y1="30" x2="154" y2="30" stroke="#cbdffd" stroke-width="2"/>
                 <line x1="218" y1="30" x2="228" y2="30" stroke="#ffdac6" stroke-width="2"/>
@@ -321,273 +343,278 @@ Where Q(x) is the tail probability of a standard normal distribution.
 
       </div>
     </div>
+    <!-- End block diagrams excerpt -->
+
+    <h3>4. Constellation Diagram</h3>
+    <p>
+      The <keyword>Constellation Diagram</keyword> is a 2D graphical representation of the possible signal states. The horizontal axis represents the In-phase component (<code>I</code>), and the vertical axis represents the Quadrature component (<code>Q</code>).
+    </p>
+    <ul style="margin:8px 0 0 18px;">
+      <li>Each point on the grid represents a unique symbol corresponding to a specific bit pattern.</li>
+      <li>To minimize the <keyword>Bit Error Rate</keyword> (BER), <keyword>Gray Coding</keyword> is typically employed so that adjacent points differ by only one bit.</li>
+    </ul>
+    
+
+    <h3>5. Advantages and Disadvantages</h3>
+    <p><strong>Advantages:</strong></p>
+    <ul style="margin:8px 0 0 18px;">
+      <li><strong>High Bandwidth Efficiency:</strong> QAM can transmit more bits per second within a given bandwidth compared to standard <keyword>BPSK</keyword> or <keyword>QPSK</keyword>.</li>
+      <li><strong>Data Rate:</strong> By increasing the constellation size (<em>M</em>), the data rate can be significantly increased without increasing the signal bandwidth.</li>
+      <li><strong>Noise Immunity:</strong> Compared to <keyword>Amplitude Shift Keying</keyword> (ASK) alone, QAM provides better noise immunity for the same energy per bit.</li>
+    </ul>
+    <p><strong>Disadvantages:</strong></p>
+    <ul style="margin:8px 0 0 18px;">
+      <li><strong>Sensitivity to Noise:</strong> As <em>M</em> increases, the distance between constellation points decreases, making the system more susceptible to <keyword>Additive White Gaussian Noise</keyword> (AWGN).</li>
+      <li><strong>Linearity Requirements:</strong> QAM signals have a high <keyword>Peak-to-Average Power Ratio</keyword> (PAPR), requiring highly linear power amplifiers to avoid distortion.</li>
+      <li><strong>Complexity:</strong> The receiver requires sophisticated <keyword>Coherent Detection</keyword> and carrier recovery circuits to maintain phase alignment.</li>
+    </ul>
+
+    <p style="margin-top:8px;">
+      <em>Note:</em> For clarity and instructional purposes, this virtual laboratory uses simple binary symbol mapping. Gray coding may be explored as an extension to study its impact on BER performance.
+    </p>
   </section>
 
- <!-- PRE-TEST -->
-<section id="pretest" class="page">
-  <h2>📝 Pre-Test (Conceptual Understanding)</h2>
-
-  <form id="pretestForm" class="quiz-form">
-
-    <!-- Q1 -->
-    <div class="quiz-q" data-answer="b">
-      <p><strong>Q1.</strong> What does QAM stand for?</p>
-      <label><input type="radio" name="q1" value="a"> Quadrature Angle Modulation</label><br>
-      <label><input type="radio" name="q1" value="b"> Quadrature Amplitude Modulation</label><br>
-      <label><input type="radio" name="q1" value="c"> Quick Amplitude Mapping</label><br>
-      <label><input type="radio" name="q1" value="d"> Quadratic Amplitude Method</label>
-      <div class="quiz-explain">
-        QAM modulates both amplitude and phase using two orthogonal carriers (I and Q).
-      </div>
-    </div>
-
-    <!-- Q2 -->
-    <div class="quiz-q" data-answer="c">
-      <p><strong>Q2.</strong> How many bits per symbol are transmitted in 16-QAM?</p>
-      <label><input type="radio" name="q2" value="a"> 2</label><br>
-      <label><input type="radio" name="q2" value="b"> 3</label><br>
-      <label><input type="radio" name="q2" value="c"> 4</label><br>
-      <label><input type="radio" name="q2" value="d"> 8</label>
-      <div class="quiz-explain">
-        Bits per symbol = log₂(M). For 16-QAM, log₂(16) = 4 bits.
-      </div>
-    </div>
-
-    <!-- Q3 -->
-    <div class="quiz-q" data-answer="a">
-      <p><strong>Q3.</strong> What do the I and Q components represent in QAM?</p>
-      <label><input type="radio" name="q3" value="a"> Orthogonal cosine and sine components</label><br>
-      <label><input type="radio" name="q3" value="b"> Frequency offsets</label><br>
-      <label><input type="radio" name="q3" value="c"> Noise samples</label><br>
-      <label><input type="radio" name="q3" value="d"> Error correction bits</label>
-      <div class="quiz-explain">
-        I and Q are orthogonal carriers that allow independent amplitude modulation.
-      </div>
-    </div>
-
-    <!-- Q4 -->
-    <div class="quiz-q" data-answer="d">
-      <p><strong>Q4.</strong> What does a constellation diagram represent?</p>
-      <label><input type="radio" name="q4" value="a"> Frequency spectrum</label><br>
-      <label><input type="radio" name="q4" value="b"> Time-domain waveform</label><br>
-      <label><input type="radio" name="q4" value="c"> Noise distribution</label><br>
-      <label><input type="radio" name="q4" value="d"> Symbol mapping in I-Q plane</label>
-      <div class="quiz-explain">
-        Each point represents a unique symbol defined by I and Q amplitudes.
-      </div>
-    </div>
-
-    <!-- Q5 -->
-    <div class="quiz-q" data-answer="b">
-      <p><strong>Q5.</strong> Increasing modulation order (M) mainly increases:</p>
-      <label><input type="radio" name="q5" value="a"> Noise immunity</label><br>
-      <label><input type="radio" name="q5" value="b"> Data rate</label><br>
-      <label><input type="radio" name="q5" value="c"> Symbol spacing</label><br>
-      <label><input type="radio" name="q5" value="d"> Signal power</label>
-      <div class="quiz-explain">
-        Higher M allows more bits per symbol, increasing spectral efficiency.
-      </div>
-    </div>
-
-    <!-- Q6 -->
-    <div class="quiz-q" data-answer="a">
-      <p><strong>Q6.</strong> What is AWGN?</p>
-      <label><input type="radio" name="q6" value="a"> Additive White Gaussian Noise</label><br>
-      <label><input type="radio" name="q6" value="b"> Adaptive Wideband Gain Noise</label><br>
-      <label><input type="radio" name="q6" value="c"> Analog Waveform Generator Noise</label><br>
-      <label><input type="radio" name="q6" value="d"> Asymmetric Wireless Gain Noise</label>
-      <div class="quiz-explain">
-        AWGN is a standard noise model with constant spectral density and Gaussian distribution.
-      </div>
-    </div>
-
-    <!-- Q7 -->
-    <div class="quiz-q" data-answer="c">
-      <p><strong>Q7.</strong> BER is defined as:</p>
-      <label><input type="radio" name="q7" value="a"> Ratio of symbols to bits</label><br>
-      <label><input type="radio" name="q7" value="b"> Total received bits</label><br>
-      <label><input type="radio" name="q7" value="c"> Number of bit errors / total bits</label><br>
-      <label><input type="radio" name="q7" value="d"> Noise power ratio</label>
-      <div class="quiz-explain">
-        BER measures the reliability of digital communication systems.
-      </div>
-    </div>
-
-    <!-- Q8 -->
-    <div class="quiz-q" data-answer="b">
-      <p><strong>Q8.</strong> SER differs from BER because it counts:</p>
-      <label><input type="radio" name="q8" value="a"> Bit errors only</label><br>
-      <label><input type="radio" name="q8" value="b"> Symbol errors</label><br>
-      <label><input type="radio" name="q8" value="c"> Noise samples</label><br>
-      <label><input type="radio" name="q8" value="d"> Frequency shifts</label>
-      <div class="quiz-explain">
-        One symbol error may cause multiple bit errors depending on modulation.
-      </div>
-    </div>
-
-    <!-- Q9 -->
-    <div class="quiz-q" data-answer="d">
-      <p><strong>Q9.</strong> Increasing SNR generally results in:</p>
-      <label><input type="radio" name="q9" value="a"> Higher noise</label><br>
-      <label><input type="radio" name="q9" value="b"> More errors</label><br>
-      <label><input type="radio" name="q9" value="c"> Lower data rate</label><br>
-      <label><input type="radio" name="q9" value="d"> Lower BER</label>
-      <div class="quiz-explain">
-        Higher SNR means signal dominates noise, improving detection accuracy.
-      </div>
-    </div>
-
-    <!-- Q10 -->
-    <div class="quiz-q" data-answer="a">
-      <p><strong>Q10.</strong> Why does higher-order QAM require higher SNR?</p>
-      <label><input type="radio" name="q10" value="a"> Constellation points are closer</label><br>
-      <label><input type="radio" name="q10" value="b"> Fewer symbols are used</label><br>
-      <label><input type="radio" name="q10" value="c"> Noise power increases</label><br>
-      <label><input type="radio" name="q10" value="d"> Sampling rate decreases</label>
-      <div class="quiz-explain">
-        Closely spaced symbols are more sensitive to noise and distortions.
-      </div>
-    </div>
-
-    <button type="button" class="btn" onclick="submitPretest()">Submit Pre-Test</button>
-  </form>
-
-  <div id="pretestResult" class="quiz-result"></div>
-</section>
-
-
+  <!-- PROCEDURE -->
+  <section id="procedure" class="page" role="region" aria-labelledby="procedure">
+    <h2> Procedure</h2>
+<ol>
+  <li>Select the modulation order (M) from the control panel.</li>
+  <li>Enter the number of input bits. The simulator automatically groups bits into symbols based on the selected modulation order.</li>
+  <li>
+For meaningful BER observation at high SNR, use a large number of bits
+(e.g., ≥10,000).
+</li>
+  <li>Adjust the Signal-to-Noise Ratio (SNR) in dB to simulate different channel conditions.</li>
+  <li>Set the carrier frequency and symbol rate. The symbol duration is automatically derived from the symbol rate.</li>
+  <li>At high SNR, BER may appear zero for small bit counts; increase the number of bits or reduce SNR to observe errors.</li>
+  <li>Click <b>Run Simulation</b> to observe the constellation diagram, time-domain waveform, and BER/SER values.</li>
+  <li>Repeat the experiment by varying SNR and modulation order to study performance trade-offs.</li>
+</ol>
+    <p style="margin-top:8px;">
+      Tips:
+    </p>
+    <ul style="margin:8px 0 0 18px;">
+      <li>Use the constellation plot to see clustering around ideal points and to visually estimate decision regions.</li>
+      <li>Lower the SNR to observe how noise spreads constellation points and causes bit errors.</li>
+      <li>Compare BER/SER values across different modulation orders at the same SNR to understand the noise vs. spectral efficiency trade-off.</li>
+    </ul>
+  </section>
 
   <!-- SIMULATION -->
   <section id="simulation" class="page" role="region" aria-labelledby="simulation">
-    <h2>🔬 Simulation</h2>
-    <p class="small-muted" style="margin-top:6px;">
-  This simulation primarily demonstrates <strong>QAM signal representation and constellation behavior</strong>.
-  BER and SER are shown as performance indicators to observe the effect of noise, not as exact analytical results.
-</p>
-<p class="small-muted">
-  All plots are interactive. Signals can be individually shown or hidden using plot legends for focused analysis.
-</p>
+    <h2> Simulation</h2>
 
-   <div class="simulation-layout">
-
-      <!-- Left: controls -->
-      <div>
-        <div class="input-group">
-          <label for="modSelect">Modulation (M)</label>
-          <select id="modSelect" aria-label="Modulation">
-            <option value="4">4-QAM</option>
-            <option value="16">16-QAM</option>
-            <option value="64">64-QAM</option>
-            <option value="256">256-QAM</option>
-          </select>
-        </div>
-
- 
-        <div class="input-group">
-          <label for="numBits">Number of Bits</label>
-          <input id="numBits" type="number" min="4" max="20000" step="1" value="1024">
-          <div class="small-muted">Tip: BER is statistical.  
-At high SNR, use ≥10,000 bits to observe reliable BER values.</div>
-        </div>
-
-        <div class="input-group">
-          <label>SNR (dB): <span id="snrVal" class="small-muted">20</span></label>
-          <div class="slider-row">
-            <input id="snr" type="range" min="0" max="30" step="0.5" value="20">
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label for="carrierFreq">Carrier frequency (Hz)</label>
-          <input id="carrierFreq" type="number" min="100" max="200000" step="100" value="2000">
-        </div>
-
-        <div class="input-group">
-          <label for="symbolRate">Symbol rate (symbols/sec)</label>
-          <input id="symbolRate" type="number" min="1" max="1000000" step="1" value="2000">
-        </div>
-
-        <div class="controls-row" style="margin-top:12px">
-          <button id="runSim" class="btn">▶ Run Simulation</button>
-          <button id="resetBtn" class="btn" style="background:#999">Reset</button>
-        </div>
-
-
-        <div class="results" style="margin-top:14px">
-          <div class="card"><div class="label">Total Bits</div><div class="value" id="outTotalBits">0</div></div>
-          <div class="card"><div class="label">Bits/sec</div><div class="value" id="outBitRate">0 Mbps</div></div>
-          <div class="card"><div class="label">Symbol Rate</div><div class="value" id="outSymbolRate">0 sym/s</div></div>
-          <div class="card"><div class="label">BER</div><div class="value" id="outBER">0</div></div>
-          <div class="card"><div class="label">SER</div><div class="value" id="outSER">0</div></div>
-        </div>
+    <!-- Controls (re‑organized) -->
+    <div class="controls-row1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
+      <div class="input-group">
+        <label for="modSelect">Modulation Order (M-QAM)</label>
+        <select id="modSelect">
+          <option value="4">4-QAM (QPSK)</option>
+          <option value="16" selected>16-QAM</option>
+          <option value="64">64-QAM</option>
+          <option value="256">256-QAM</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="numBits">Number of Bits</label>
+        <input id="numBits" type="number" min="4" max="100000" step="4" value="1024">
+      </div>
+      <div class="input-group">
+        <label for="snr">SNR (dB): <span id="snrVal" class="slider-value">20</span></label>
+        <input id="snr" type="range" min="0" max="30" step="1" value="20" style="width:100%">
+      </div>
     </div>
-      <div class="footer-note">
-  <strong>Understanding BER (Important):</strong><br>
-  BER is a statistical measure. At high SNR, errors are rare.
-  With a small number of bits, BER may appear as zero even though noise is present.
-  To observe meaningful BER values:
-  <ul>
-    <li>Use ≥ 10,000 bits at moderate/high SNR</li>
-    <li>Reduce SNR to clearly see errors</li>
-    <li>Use higher-order QAM (16/64/256-QAM)</li>
-  </ul>
-</div>
+    <div class="controls-row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
+      <div class="input-group">
+        <label for="carrierFreq">Carrier Frequency (Hz)</label>
+        <div><span id="cfVal" class="slider-value">2000</span></div>
+        <input id="carrierFreq" type="range" min="500" max="5000" step="100" value="2000" style="width:100%">
+      </div>
+      <div class="input-group">
+        <label for="symbolRate">Symbol Rate (symbols/sec)</label>
+        <div><span id="srVal" class="slider-value">2000</span></div>
+        <input id="symbolRate" type="range" min="500" max="5000" step="100" value="2000" style="width:100%">
+      </div>
+    </div>
 
-      <!-- Right: visualizations -->
-      <div>
-        <div style="background:#050713;padding:12px;border-radius:8px;border:1px solid #00fff7">
-          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-            <strong>Constellation Diagram</strong>
-            <div class="legend">
-              <div class="legend-item"><div class="legend-dot blue"></div><div class="small">Ideal</div></div>
-              <div class="legend-item"><div class="legend-dot red"></div><div class="small">Received</div></div>
-            </div>
-          </div>
-          <div class="small-muted" style="margin-top:6px">
-  Tip: Click legend items (Ideal / Transmitted / Received) to hide or show signals.
-</div>
-          <div id="constellationPlot" style="height:360px;margin-top:8px"></div>
+    <div class="controls-row" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button id="runSim" class="btn">▶ Run Simulation</button>
+      <button id="resetBtn" class="btn" style="background:#999;">Reset</button>
+      <div id="simState" style="color:#00fff7;font-weight:700;margin-left:1rem;">READY</div>
+    </div>
+    <div class="controls-row" style="margin-bottom:16px;display:flex;gap:20px;align-items:center;">
+      <label><input id="ch1Toggle" type="checkbox" checked> CH1</label>
+      <label><input id="ch2Toggle" type="checkbox" checked> CH2</label>
+    </div>
+
+    <div class="results" style="margin-bottom:16px;">
+      <div class="card"><div class="label">Total Bits</div><div class="value" id="outTotalBits">0</div></div>
+      <div class="card"><div class="label">Bits/sec</div><div class="value" id="outBitRate">0 bps</div></div>
+      <div class="card"><div class="label">Symbol Rate</div><div class="value" id="outSymbolRate">0 sym/s</div></div>
+      <div class="card"><div class="label">BER</div><div class="value" id="outBER">0</div></div>
+      <div class="card"><div class="label">SER</div><div class="value" id="outSER">0</div></div>
+    </div>
+
+    <div class="footer-note" style="margin-bottom:16px;">
+      <strong>Understanding BER (Important):</strong><br>
+      BER is a statistical measure. At high SNR, errors are rare.
+      With a small number of bits, BER may appear as zero even though noise is present.
+      To observe meaningful BER values:
+      <ul style="margin-left:16px;margin-top:6px;">
+        <li>Use ≥ 10,000 bits at moderate/high SNR</li>
+        <li>Reduce SNR to clearly see errors</li>
+        <li>Use higher-order QAM (16/64/256-QAM)</li>
+      </ul>
+    </div>
+
+    <!-- Constellation Plot -->
+    <div style="background:#050713;padding:12px;border-radius:8px;border:1px solid #00fff7;margin-bottom:14px;">
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+        <strong style="color:#e5e7eb;">Constellation Diagram</strong>
+        <div class="legend" style="display:flex;gap:10px;">
+          <div class="legend-item" style="display:flex;align-items:center;gap:4px;"><div class="legend-dot blue" style="width:12px;height:12px;border-radius:50%;background:#2196F3;"></div><div class="small" style="color:#e5e7eb;">Ideal</div></div>
+          <div class="legend-item" style="display:flex;align-items:center;gap:4px;"><div class="legend-dot red" style="width:12px;height:12px;border-radius:50%;background:#f44336;"></div><div class="small" style="color:#e5e7eb;">Received</div></div>
         </div>
+      </div>
+      <div class="small-muted" style="margin-top:6px;color:#9aa4ff;font-size:0.85rem;">Tip: Click legend items to show/hide signal layers.</div>
+      <div id="constellationPlot" style="height:360px;margin-top:8px;"></div>
+    </div>
 
-        <div style="height:14px"></div>
-
-        <div style="background:#050713;padding:12px;border-radius:8px;border:1px solid #00fff7">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <strong>Time-domain Waveform</strong>
-            <div>
-              <label style="margin-right:8px"><input id="toggleNoisy" type="checkbox" checked> Show noisy</label>
-              <button id="zoomReset" class="btn" style="background:#2f3ea3;padding:6px 10px">Reset Zoom</button>
-            </div>
-          </div>
-          <div class="small-muted" style="margin-top:6px">
-  Tip: Click legend items (Clean QAM / Noisy) waveform.
-  This helps isolate the effect of noise in the time domain.
-</div>
-          <div id="waveformPlot" style="height:320px;margin-top:8px"></div>
+    <!-- CRO Display Container -->
+    <div class="cro-container">
+      <!-- CRO Header with Channel & Status -->
+      <div class="cro-header">
+        <div class="cro-channel-labels">
+          <span id="labelCH1" class="cro-channel-label ch1-label">CH1</span>
+          <span id="labelCH2" class="cro-channel-label ch2-label">CH2</span>
         </div>
+        <div class="cro-status-indicators">
+          <span class="status-indicator active">RUN</span>
+          <span class="status-separator">●</span>
+          <span class="status-indicator stop-indicator">STOP</span>
+        </div>
+      </div>
 
-        <div style="height:12px"></div>
+      <!-- CRO Display Screen -->
+      <div class="cro-display-wrapper">
+        <!-- Grid Overlay (fixed background) -->
+        <div class="cro-grid-overlay"></div>
 
-<div class="bit-box">
-  <div class="bit-title">Bit Error Visualization (First 200 Bits)</div>
-<div class="small-muted">
-  Sample view for illustration; BER is computed using all transmitted bits.
-</div>
-  <div id="bitCompare" class="bit-content"></div>
-</div>
+        <!-- Real-time waveform canvas (above grid) -->
+        <canvas id="waveformCanvas" class="cro-waveform-canvas"></canvas>
+        
+        <!-- Legacy waveform placeholder (Plotly) - kept for compatibility -->
+        <div id="waveformPlot" class="cro-waveform-area"></div>
+      </div>
+
+      <!-- CRO Control Labels (Display Indicators) -->
+      <div class="cro-control-labels">
+        <div class="cro-control-item">
+          <span class="cro-control-label">TIME/DIV</span>
+          <span class="cro-control-value" id="timePerDiv">0.50 ms</span>
+        </div>
+        <div class="cro-control-item">
+          <span class="cro-control-label">VOLT/DIV</span>
+          <span class="cro-control-value" id="voltPerDiv">2.00 V</span>
+        </div>
+        <div class="cro-control-spacer"></div>
+        <div class="cro-control-item">
+          <label style="margin-right:10px;color:#e5e7eb;font-size:0.9rem;">
+            <input id="toggleNoisy" type="checkbox" checked> Noisy Signal
+          </label>
+        </div>
+        <button id="zoomReset" class="btn" style="background:#2f3ea3;padding:6px 10px;font-size:0.85rem;">Reset Zoom</button>
+      </div>
+    </div>
+
+    <!-- Bit Error Visualization -->
+    <div class="bit-box">
+      <div class="bit-title">Bit Error Visualization (First 200 Bits)</div>
+      <div class="small-muted" style="font-size:0.85rem;color:#9aa4ff;margin-bottom:6px;">Sample view for illustration; BER is computed using all transmitted bits.</div>
+      <div id="bitCompare" class="bit-content"></div>
+    </div>
+
+    <!-- Details Box -->
+    <div class="details-box">
+      <div class="details-title">Details (For Verification &amp; Advanced Observation)</div>
+      <div id="detailedInfo" class="details-content">No simulation run yet.</div>
+    </div>
+
+    <!-- Simulation-specific help (hidden until requested) -->
+    <button id="simHelpBtn" class="help-btn" style="margin-top:20px;"><i class="fas fa-lightbulb"></i> HELP</button>
+    <div id="simHelpContainer" class="help-container hidden">
+      <div class="help-card">
+        <div class="help-header">
+          <h2>Simulation Help</h2>
+          <span id="closeSimHelp" class="close-btn">&times;</span>
+        </div>
+        <p>Use the sliders above to tweak SNR, carrier frequency, and symbol rate. Observe how changes affect constellation and BER/SER.</p>
+        <p><strong>Example starting values:</strong> SNR = 20 dB, Frequency = 2000 Hz, Symbol Rate = 2000 sym/s.</p>
+      </div>
+    </div>
+
+  </section>
+<!-- PRE-TEST -->
+<section id="pretest" class="page" role="region" aria-labelledby="pretest">
+  <h2> Pre-Test</h2>
+  <p>Answer the following questions to assess your prior knowledge of QAM concepts before starting the experiment.</p>
+
+  <div class="quiz-form">
+
+    <div class="quiz-q" data-answer="a">
+      <p><strong>Q1.</strong> What does QAM stand for?</p>
+      <label><input type="radio" name="q1" value="a"> Quadrature Amplitude Modulation</label><br>
+      <label><input type="radio" name="q1" value="b"> Quantum Amplitude Measurement</label><br>
+      <label><input type="radio" name="q1" value="c"> Quick Analog Modulation</label><br>
+      <label><input type="radio" name="q1" value="d"> Quadratic Amplitude Module</label>
+      <div class="quiz-explain">QAM stands for Quadrature Amplitude Modulation, where two carriers 90° apart are combined to carry data.</div>
+    </div>
+
+    <div class="quiz-q" data-answer="b">
+      <p><strong>Q2.</strong> How many distinct symbols does 16-QAM use?</p>
+      <label><input type="radio" name="q2" value="a"> 8</label><br>
+      <label><input type="radio" name="q2" value="b"> 16</label><br>
+      <label><input type="radio" name="q2" value="c"> 32</label><br>
+      <label><input type="radio" name="q2" value="d"> 4</label>
+      <div class="quiz-explain">16-QAM has 16 symbols arranged in a 4×4 grid on the I/Q plane.</div>
+    </div>
+
+    <div class="quiz-q" data-answer="b">
+      <p><strong>Q3.</strong> How many bits per symbol does 64-QAM encode?</p>
+      <label><input type="radio" name="q3" value="a"> 4</label><br>
+      <label><input type="radio" name="q3" value="b"> 6</label><br>
+      <label><input type="radio" name="q3" value="c"> 8</label><br>
+      <label><input type="radio" name="q3" value="d"> 2</label>
+      <div class="quiz-explain">log₂(64) = 6 bits per symbol.</div>
+    </div>
+
+    <div class="quiz-q" data-answer="b">
+      <p><strong>Q4.</strong> What do I and Q represent in QAM?</p>
+      <label><input type="radio" name="q4" value="a"> Input and Quality</label><br>
+      <label><input type="radio" name="q4" value="b"> In-phase and Quadrature</label><br>
+      <label><input type="radio" name="q4" value="c"> Impedance and Quantum</label><br>
+      <label><input type="radio" name="q4" value="d"> Integer and Quotient</label>
+      <div class="quiz-explain">I = In-phase component, Q = Quadrature component. They are orthogonal (90° apart).</div>
+    </div>
+
+    <div class="quiz-q" data-answer="b">
+      <p><strong>Q5.</strong> What is the primary advantage of QAM over simpler modulation schemes?</p>
+      <label><input type="radio" name="q5" value="a"> Lower cost hardware</label><br>
+      <label><input type="radio" name="q5" value="b"> Higher spectral efficiency</label><br>
+      <label><input type="radio" name="q5" value="c"> Longer range</label><br>
+      <label><input type="radio" name="q5" value="d"> Simpler implementation</label>
+      <div class="quiz-explain">QAM can encode more bits per symbol than simpler schemes, improving spectral efficiency.</div>
+    </div>
 
 
-<div class="details-box">
-  <div class="details-title">Details (For Verification & Advanced Observation)</div>
-  <div id="detailedInfo" class="details-content">
-    No simulation run yet.
+    <button type="button" class="btn" onclick="submitPretest()" style="margin-top:12px;">Submit Pre-Test</button>
   </div>
-</div>
 
 </section>
+
 <!-- POST-TEST -->
 <section id="posttest" class="page">
-  <h2>🧪 Post-Test (Performance & Analysis)</h2>
+  <h2> Post-Test (Performance & Analysis)</h2>
 
   <form id="posttestForm" class="quiz-form">
 
@@ -644,136 +671,50 @@ At high SNR, use ≥10,000 bits to observe reliable BER values.</div>
     </div>
 
     <!-- Q5 -->
-    <div class="quiz-q" data-answer="b">
-      <p><strong>Q5.</strong> Why does 256-QAM need high SNR?</p>
-      <label><input type="radio" name="pq5" value="a"> Uses more power</label><br>
-      <label><input type="radio" name="pq5" value="b"> Symbols are closely spaced</label><br>
-      <label><input type="radio" name="pq5" value="c"> Higher frequency required</label><br>
-      <label><input type="radio" name="pq5" value="d"> Needs more bandwidth</label>
-
-      <div class="quiz-explain">
-        Smaller distance between symbols increases sensitivity to noise.
-      </div>
-    </div>
-
-    <!-- Q6 -->
-    <div class="quiz-q" data-answer="c">
-      <p><strong>Q6.</strong> BER is calculated as:</p>
-      <label><input type="radio" name="pq6" value="a"> Errors / symbols</label><br>
-      <label><input type="radio" name="pq6" value="b"> Symbols / bits</label><br>
-      <label><input type="radio" name="pq6" value="c"> Bit errors / total bits</label><br>
-      <label><input type="radio" name="pq6" value="d"> Noise power ratio</label>
-
-      <div class="quiz-explain">
-        BER measures the fraction of bits received incorrectly.
-      </div>
-    </div>
-
-    <!-- Q7 -->
     <div class="quiz-q" data-answer="a">
-      <p><strong>Q7.</strong> What does SER measure?</p>
-      <label><input type="radio" name="pq7" value="a"> Symbol errors</label><br>
-      <label><input type="radio" name="pq7" value="b"> Bit transitions</label><br>
-      <label><input type="radio" name="pq7" value="c"> Noise variance</label><br>
-      <label><input type="radio" name="pq7" value="d"> Phase noise</label>
-
-      <div class="quiz-explain">
-        SER counts incorrectly detected symbols.
-      </div>
-    </div>
-
-    <!-- Q8 -->
-    <div class="quiz-q" data-answer="d">
-      <p><strong>Q8.</strong> Which technique reduces BER without increasing SNR?</p>
-      <label><input type="radio" name="pq8" value="a"> Higher M</label><br>
-      <label><input type="radio" name="pq8" value="b"> Higher carrier frequency</label><br>
-      <label><input type="radio" name="pq8" value="c"> Lower sampling</label><br>
-      <label><input type="radio" name="pq8" value="d"> Forward error correction</label>
-
-      <div class="quiz-explain">
-        FEC adds redundancy to correct errors at the receiver.
-      </div>
-    </div>
-
-    <!-- Q9 -->
-    <div class="quiz-q" data-answer="b">
-      <p><strong>Q9.</strong> Higher-order QAM primarily improves:</p>
-      <label><input type="radio" name="pq9" value="a"> Noise immunity</label><br>
-      <label><input type="radio" name="pq9" value="b"> Spectral efficiency</label><br>
-      <label><input type="radio" name="pq9" value="c"> Power efficiency</label><br>
-      <label><input type="radio" name="pq9" value="d"> Synchronization</label>
-
-      <div class="quiz-explain">
-        More bits per symbol increase data rate for the same bandwidth.
-      </div>
-    </div>
-
-    <!-- Q10 -->
-    <div class="quiz-q" data-answer="c">
-      <p><strong>Q10.</strong> In this lab, received symbols are detected using:</p>
-      <label><input type="radio" name="pq10" value="a"> FFT</label><br>
-      <label><input type="radio" name="pq10" value="b"> Correlation</label><br>
-      <label><input type="radio" name="pq10" value="c"> Nearest-neighbor decision</label><br>
-      <label><input type="radio" name="pq10" value="d"> Maximum likelihood coding</label>
-
-      <div class="quiz-explain">
-        Nearest constellation point is chosen as the detected symbol.
-      </div>
+      <p><strong>Q5.</strong> The formula for bits per symbol in M-QAM is:</p>
+      <label><input type="radio" name="pq5" value="a"> k = log₂(M)</label><br>
+      <label><input type="radio" name="pq5" value="b"> k = M / 2</label><br>
+      <label><input type="radio" name="pq5" value="c"> k = √M</label><br>
+      <label><input type="radio" name="pq5" value="d"> k = M²</label>
+      <div class="quiz-explain">k = log₂(M). For example, in 16-QAM: k = 4 bits/symbol.</div>
     </div>
 
     <button type="button" class="btn" onclick="submitPosttest()">Submit Post-Test</button>
   </form>
 
-  <div id="posttestResult" class="quiz-result"></div>
+
+</section>
+
+<!-- RESULTS & SUMMARY -->
+<section id="results" class="page" role="region" aria-labelledby="results">
+  <h2> Results</h2>
+  <div id="overallResults" class="quiz-result"></div>
+  <h3>What We Did in This Virtual Lab</h3>
+  <ul>
+    <li>Explored QAM theory and mathematical formulation.</li>
+    <li>Visualized various M‑QAM constellation diagrams.</li>
+    <li>Added AWGN noise and studied BER/SER effects.</li>
+    <li>Performed pre‑test and post‑test to reinforce learning.</li>
+  </ul>
 </section>
 
 
 
 
-  <!-- FAQ -->
-  <section id="faq" class="page" role="region" aria-labelledby="faq">
-    <h2>❓ FAQ</h2>
-    <h4 class="faq-q">Q: How are input bits handled in this experiment?</h4>
-<p>
-A: The experiment generates a random bit stream based on the selected number of bits.
-These bits are automatically grouped into symbols according to the chosen modulation order.
-</p>
 
-    <h4 class="faq-q" style="margin-top:8px;">Q: How does SNR affect the constellation?</h4>
-    <p>A: Higher SNR (dB) means less noise and tighter clusters around ideal constellation points. Lower SNR spreads the received points and increases the probability of incorrect nearest-neighbor decisions, raising BER and SER.</p>
 
-    <h4 class="faq-q" style="margin-top:8px;">Q: Are Gray coding and bit-mapping used here?</h4>
-    <p>A: This lab uses a simple binary index mapping (row-major) for clarity and teaching. Gray mapping reduces bit errors for single-symbol errors and can be added as an exercise.</p>
-
-    <h4 class="faq-q" style="margin-top:8px;">Q: Can I use this simulator for performance benchmarking?</h4>
-    <p>A: The simulator is intended for demonstration and teaching. For rigorous performance benchmarking (large sample sweeps, Monte Carlo accuracy), use dedicated tools (MATLAB, Python with comms libraries) and ensure sufficient sample counts.</p>
-
-    <h4 class="faq-q" style="margin-top:8px;">Q: What should I change to make waveforms more detailed?</h4>
-    <p>A: Increase samples-per-symbol in the code (not exposed directly in UI) or increase symbol duration and sampling frequency. For presentations, moderate sampling with clear axis labels works best.</p>
-
-    <!-- Extra FAQ entries -->
-    <h4 style="margin-top:8px;">Q: Why is 256-QAM more sensitive to non-linearities?</h4>
-    <p>A: Because constellation points are closer together, any amplitude/phase distortion (e.g., amplifier non-linearity) shifts points more likely across decision boundaries. Linearization and high SNR are needed for reliable 256-QAM links.</p>
-
-    <h4 class="faq-q" style="margin-top:8px;">Q: How can BER be reduced without increasing SNR?</h4>
-    <p>A: Use forward error correction (FEC), interleaving, better pulse shaping, equalization to combat channel impairments, or lower the modulation order.</p>
-  </section>
-
-  <!-- REFERENCES -->
-  <section id="references" class="page" role="region" aria-labelledby="references">
-    <h2>📖 References</h2>
-   <ol>
-      <li>John G. Proakis & Masoud Salehi — Digital Communications (classic textbook covering modulation, detection, and channel models)</li>
-      <li>Simon Haykin — Communication Systems (concepts on modulation and noise performance)</li>
-      <li>MATLAB Communications Toolbox examples — practical implementations and BER vs SNR simulations</li>
-      <li>GNU Radio documentation — practical software-defined radio examples and QAM implementations</li>
-      <li>Sklar, B. — Digital Communications: Fundamentals and Applications</li>
-      <li>IEEE tutorials and university lecture notes on QAM & AWGN modeling</li>
-      <li>Online references: 3GPP specifications (for cellular adaptive modulation details)</li>
-    </ol>
-  </section>
 
 </div>
+
+<!-- ===== Project Footer ===== -->
+<footer style="margin-top:40px;background:#0f172a;color:#e5e7eb;padding:24px 16px;text-align:center;font-family:'Segoe UI',Arial,sans-serif;">
+  <h3 style="margin-bottom:8px;color:#38bdf8;">QAM Virtual Laboratory</h3>
+  <p style="margin:6px 0;font-weight:600;">Department of Electronics and Communication Engineering</p>
+  <hr style="max-width:600px;margin:16px auto;border:0;border-top:1px solid #334155;">
+  <p style="margin-top:16px;font-size:0.9rem;color:#3abbea;">© 2026 Puducherry Technological University</p>
+</footer>
+<!-- ===== End Footer ===== -->
 
 <script>
 /* ---- Utility & Simulation Engine ---- */
@@ -785,7 +726,15 @@ document.addEventListener('DOMContentLoaded', () => {
     navBtns.forEach(b=>b.classList.remove('active'));
     pages.forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById(btn.dataset.page).classList.add('active');
+    const targetPage = document.getElementById(btn.dataset.page);
+    targetPage.classList.add('active');
+
+    // reset any scrolling so each section starts at top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTop = 0;       // for Safari
+    document.documentElement.scrollTop = 0; // for other browsers
+    const container = document.querySelector('.container');
+    if (container) container.scrollTop = 0;
   }));
 
   // Controls
@@ -858,9 +807,228 @@ document.addEventListener('DOMContentLoaded', () => {
   { responsive:true }
 );
 
+  // setup real-time waveform canvas and animation
+  const waveformCanvas = document.getElementById('waveformCanvas');
+  if (waveformDiv) waveformDiv.style.display = 'none';  // hide legacy plot
+  let wfCtx = null;
+  let waveformRunning = true;
+  let sweepOffset = 0;
+  let lastFrameTime = performance.now();
+  
+  // channel visibility flags
+  let showCH1 = true;
+  let showCH2 = true;
+  
+  // waveform data storage for CH2
+  let lastCleanWave = null;
 
-  // update SNR label
-  snrEl.addEventListener('input', ()=> snrVal.textContent = snrEl.value);
+  function resizeWaveformCanvas() {
+    if (waveformCanvas) {
+      waveformCanvas.width = waveformCanvas.clientWidth;
+      waveformCanvas.height = waveformCanvas.clientHeight;
+      if (!wfCtx) wfCtx = waveformCanvas.getContext('2d');
+    }
+  }
+  window.addEventListener('resize', resizeWaveformCanvas);
+  resizeWaveformCanvas();
+
+  // channel toggle listeners
+  const ch1Toggle = document.getElementById('ch1Toggle');
+  const ch2Toggle = document.getElementById('ch2Toggle');
+  const labelCH1 = document.getElementById('labelCH1');
+  const labelCH2 = document.getElementById('labelCH2');
+  if (ch1Toggle && labelCH1) {
+    ch1Toggle.addEventListener('change', () => {
+      showCH1 = ch1Toggle.checked;
+      labelCH1.classList.toggle('inactive', !showCH1);
+    });
+  }
+  if (ch2Toggle && labelCH2) {
+    ch2Toggle.addEventListener('change', () => {
+      showCH2 = ch2Toggle.checked;
+      labelCH2.classList.toggle('inactive', !showCH2);
+    });
+  }
+
+  // store numeric display values for scaling
+  // (SimulationEngine is a const defined earlier) — add properties directly
+  SimulationEngine.timePerDiv = 5; // default ms
+  SimulationEngine.voltPerDiv = 2; // default V
+
+  function drawOscilloscope(timestamp) {
+    if (!wfCtx) return;
+    const dt = timestamp - lastFrameTime;
+    lastFrameTime = timestamp;
+
+    if (waveformRunning) {
+      // update sweep position
+      const timeDiv = SimulationEngine.timePerDiv; // ms per division
+      const divisions = 10; // minor divisions across width
+      const pxPerMs = waveformCanvas.width / (divisions * timeDiv);
+      sweepOffset = (sweepOffset + dt * pxPerMs) % waveformCanvas.width;
+
+      // clear with slight persistence
+      wfCtx.fillStyle = 'rgba(5,7,19,0.12)';
+      wfCtx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+
+      // draw waveform
+      const fc = Number(carrierFreq.value); // Hz
+      const amp = 1; // normalized
+      const heightHalf = waveformCanvas.height / 2;
+      const voltScale = SimulationEngine.voltPerDiv;
+      const pxPerVolt = waveformCanvas.height / (divisions * voltScale);
+
+      wfCtx.strokeStyle = '#00ff00';
+      wfCtx.lineWidth = 2;
+      wfCtx.lineJoin = 'round';
+      wfCtx.lineCap = 'round';
+      // draw selected channels in separate passes
+      if (showCH1) {
+        wfCtx.strokeStyle = '#00ff00';
+        wfCtx.beginPath();
+        for (let x = 0; x < waveformCanvas.width; x++) {
+          const t = ((x + sweepOffset) / pxPerMs) / 1000; // seconds
+          const snr = Number(snrEl.value);
+          const noiseStd = 1 / Math.sqrt(Math.pow(10, snr / 10));
+          const noise = (Math.random() * 2 - 1) * noiseStd * 0.1;
+          const y1 = amp * Math.sin(2 * Math.PI * fc * t) + noise;
+          const yPx = heightHalf - y1 * pxPerVolt;
+          if (x === 0) wfCtx.moveTo(x, yPx);
+          else wfCtx.lineTo(x, yPx);
+        }
+        wfCtx.stroke();
+      }
+      if (showCH2 && lastCleanWave) {
+        wfCtx.strokeStyle = '#ff88ff';
+        wfCtx.beginPath();
+        const fs = lastCleanWave.fs;
+        for (let x = 0; x < waveformCanvas.width; x++) {
+          const t = ((x + sweepOffset) / pxPerMs) / 1000;
+          const idx = Math.floor(t * fs) % lastCleanWave.y.length;
+          const y2 = lastCleanWave.y[idx];
+          const y2Px = heightHalf - y2 * pxPerVolt;
+          if (x === 0) wfCtx.moveTo(x, y2Px);
+          else wfCtx.lineTo(x, y2Px);
+        }
+        wfCtx.stroke();
+      }
+    }
+    requestAnimationFrame(drawOscilloscope);
+  }
+  requestAnimationFrame(drawOscilloscope);
+
+  // run/stop toggling via status indicators
+  // declare variables in outer scope so reset handler can access them
+  let runIndicator = document.querySelector('.status-indicator.active');
+  let stopIndicator = document.querySelectorAll('.status-indicator')[1];
+  if (runIndicator && stopIndicator) {
+    runIndicator.addEventListener('click', () => {
+      waveformRunning = true;
+      lastFrameTime = performance.now();
+      runIndicator.classList.add('active');
+      stopIndicator.classList.remove('active');
+      document.getElementById('simState').textContent = 'RUNNING';
+    });
+    stopIndicator.addEventListener('click', () => {
+      waveformRunning = false;
+      stopIndicator.classList.add('active');
+      runIndicator.classList.remove('active');
+      document.getElementById('simState').textContent = 'STOPPED';
+    });
+  }
+
+  // update SNR label and enforce bounds
+  function simulate() {
+    runBtn.click();
+  }
+
+  // Update CRO display indicators (Time/Div, Volt/Div)
+  function updateCRODisplayIndicators() {
+    const symbolRateVal = Number(symbolRate.value);
+    const snrVal = Number(snrEl.value);
+    
+    // Time/Div calculation: based on symbol duration
+    // Time per symbol = 1000 / symbolRate (in ms)
+    // Display approximately 4 symbols per screen, so Time/Div = symbol_duration / 4
+    const timePerSymbolMs = 1000 / symbolRateVal;
+    const timePerDiv = timePerSymbolMs / 4;
+    const timePerDivStr = timePerDiv < 0.1 
+      ? (timePerDiv * 1000).toFixed(2) + ' µs' 
+      : timePerDiv.toFixed(2) + ' ms';
+    
+    document.getElementById('timePerDiv').textContent = timePerDivStr;
+    // store numeric value for waveform
+    SimulationEngine.timePerDiv = timePerDiv;
+    
+    // Volt/Div calculation: based on SNR and expected signal amplitude
+    // Higher SNR = tighter clustering = smaller Volt/Div for visibility
+    // Lower SNR = wider spreading = larger Volt/Div to capture noise
+    // Base amplitude for normalized QAM constellation is roughly ±3
+    const baseVoltPerDiv = 2.0; // default scale
+    const snrFactor = Math.max(0.5, 3 - (snrVal / 15)); // adjust scale based on SNR
+    const voltPerDiv = baseVoltPerDiv * snrFactor;
+    
+    document.getElementById('voltPerDiv').textContent = voltPerDiv.toFixed(2) + ' V';
+    // store numeric value for waveform
+    SimulationEngine.voltPerDiv = voltPerDiv;
+  }
+
+  snrEl.addEventListener('input', () => {
+    let v = Number(snrEl.value);
+    if (v < 0) v = 0;
+    if (v > 30) v = 30;
+    snrEl.value = v;
+    snrVal.textContent = v;
+    // update track fill
+    const pct = ((v - 0) / (30 - 0)) * 100;
+    snrEl.style.backgroundSize = pct + '% 100%';
+    updateCRODisplayIndicators();
+    document.getElementById('simState').textContent = 'READY';
+  });
+
+  // new slider value displays with live update and bounds enforcement
+  const cfVal = document.getElementById('cfVal');
+  const srVal = document.getElementById('srVal');
+
+  carrierFreq.addEventListener('input', () => {
+    let v = Number(carrierFreq.value);
+    if (v < 500) v = 500;
+    if (v > 5000) v = 5000;
+    carrierFreq.value = v;
+    cfVal.textContent = v;
+    const pct = ((v - 500) / (5000 - 500)) * 100;
+    carrierFreq.style.backgroundSize = pct + '% 100%';
+    document.getElementById('simState').textContent = 'READY';
+  });
+
+  symbolRate.addEventListener('input', () => {
+    let v = Number(symbolRate.value);
+    if (v < 500) v = 500;
+    if (v > 5000) v = 5000;
+    symbolRate.value = v;
+    srVal.textContent = v;
+    const pct = ((v - 500) / (5000 - 500)) * 100;
+    symbolRate.style.backgroundSize = pct + '% 100%';
+    updateCRODisplayIndicators();
+    document.getElementById('simState').textContent = 'READY';
+  });
+
+  // help toggling for simulation-specific help
+  const simHelpBtn = document.getElementById('simHelpBtn');
+  const simHelpContainer = document.getElementById('simHelpContainer');
+  const closeSimHelp = document.getElementById('closeSimHelp');
+  if (simHelpBtn && simHelpContainer && closeSimHelp) {
+    simHelpBtn.addEventListener('click', () => {
+      simHelpContainer.classList.remove('hidden');
+      simHelpContainer.scrollIntoView({ behavior: 'smooth' });
+    });
+    closeSimHelp.addEventListener('click', () => {
+      simHelpContainer.classList.add('hidden');
+    });
+    simHelpContainer.addEventListener('click', e => {
+      if (e.target === simHelpContainer) simHelpContainer.classList.add('hidden');
+    });
+  }
 
   // show/hide symbol input area
 
@@ -1096,6 +1264,11 @@ const cleanWave = generateWaveform(
   samplesPerSymbol
 );
 
+// save waveform for channel 2 plotting later
+lastCleanWave = cleanWave;
+
+document.getElementById('simState').textContent = 'RUNNING';
+
 const noisyWave = generateWaveform(
   rxIQ.slice(0, maxSymbolsForWave),
   Number(carrierFreq.value),
@@ -1180,21 +1353,35 @@ Channel & Timing:
   snrVal.textContent = '20';
   carrierFreq.value = 2000;
   symbolRate.value = 2000;
-
-  outTotalBits.textContent = '0';
-  outBitRate.textContent = '0 bps';
-  outSymbolRate.textContent = '0 sym/s';
-  outBER.textContent = '0';
-  outSER.textContent = '0';
-
+  cfVal.textContent = '2000';
+  srVal.textContent = '2000';
   bitCompare.innerHTML = '';
   detailedInfo.textContent = 'No simulation run yet.';
+
+  // reset slider fills
+  snrEl.style.backgroundSize = ((snrEl.value - 0)/(30-0))*100 + '% 100%';
+  carrierFreq.style.backgroundSize = ((carrierFreq.value - 500)/(5000-500))*100 + '% 100%';
+  symbolRate.style.backgroundSize = ((symbolRate.value - 500)/(5000-500))*100 + '% 100%';
 
   Plotly.react(constellationDiv, [{x:[],y:[],mode:'markers'}],
     {...PLOTLY_DARK_THEME, title:{text:'Constellation Diagram',font:{color:'#00fff7'}}});
 
   Plotly.react(waveformDiv, [{x:[],y:[],mode:'lines'}],
     {...PLOTLY_DARK_THEME, title:{text:'Time-domain QAM waveform',font:{color:'#00fff7'}}});
+
+  // update CRO display indicators
+  updateCRODisplayIndicators();
+
+  // reset waveform sweep position and resume running
+  sweepOffset = 0;
+  waveformRunning = true;
+  if (runIndicator && stopIndicator) {
+    runIndicator.classList.add('active');
+    stopIndicator.classList.remove('active');
+  }
+  document.getElementById('simState').textContent = 'READY';
+
+  // ensure UI is consistent after reset (user may click Run when ready)
 });
 
   // toggle noisy: replot waveform to show/hide
@@ -1215,6 +1402,14 @@ Channel & Timing:
 
   // initial UI values
   snrVal.textContent = snrEl.value;
+  if (cfVal) cfVal.textContent = carrierFreq.value;
+  if (srVal) srVal.textContent = symbolRate.value;
+  // set initial slider fill
+  snrEl.style.backgroundSize = ((snrEl.value - 0)/(30-0))*100 + '% 100%';
+  carrierFreq.style.backgroundSize = ((carrierFreq.value - 500)/(5000-500))*100 + '% 100%';
+  symbolRate.style.backgroundSize = ((symbolRate.value - 500)/(5000-500))*100 + '% 100%';
+  // initialize CRO display indicators
+  updateCRODisplayIndicators();
 }); // DOMContentLoaded end
 </script>
 <!-- ===== PRE-TEST QUIZ LOGIC ===== -->
@@ -1250,8 +1445,11 @@ function submitPretest() {
     q.querySelector(".quiz-explain").style.display = "block";
   }
 
-  document.getElementById("pretestResult").innerHTML =
-    `<strong>Pre-Test Score:</strong> ${score} / 10`;
+  // update overall results container
+  const overall = document.getElementById("overallResults");
+  if (overall) {
+    overall.innerHTML = `<p><strong>Pre-Test Score:</strong> ${score} / ${questions.length}</p>` + overall.innerHTML;
+  }
 }
 </script>
 <script>
@@ -1286,45 +1484,13 @@ function submitPosttest() {
 
   }
 
-  document.getElementById('posttestResult').innerHTML =
-    `<strong>Score:</strong> ${score} / 10`;
+  const overall2 = document.getElementById('overallResults');
+  if (overall2) {
+    overall2.innerHTML = (overall2.innerHTML || '') + `<p><strong>Post-Test Score:</strong> ${score} / ${questions.length}</p>`;
+  }
 }
 </script>
 
 
-
 </body>
 </html>
-
-<!-- ===== Project Footer ===== -->
-<footer style="
-  margin-top:40px;
-  background:#0f172a;
-  color:#e5e7eb;
-  padding:24px 16px;
-  text-align:center;
-  font-family: Arial, sans-serif;
-">
-
-  <h3 style="margin-bottom:8px;color:#38bdf8;">
-    QAM Virtual Laboratory
-  </h3>
-
-  <p style="margin:6px 0;font-weight:600;">
-    Department of Electronics and Communication Engineering
-  </p>
-
-
-  <hr style="max-width:600px;margin:16px auto;border:0;border-top:1px solid #334155;">
-
-
-  
-</div>
-
-
-  <p style="margin-top:16px;font-size:0.9rem;color:#3abbea;">
-    © 2026 Puducherry Technological University
-  </p>
-
-</footer>
-<!-- ===== End Footer ===== -->

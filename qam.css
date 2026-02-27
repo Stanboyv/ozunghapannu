@@ -200,6 +200,93 @@ nav a:hover {
   transition: all 0.22s ease;
 }
 
+/* HELP PANEL STYLES */
+.help-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: #1a2a4a;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+/* hover colors overridden later but keep transition */
+.help-btn:hover {
+  /* background and icon handled in later rules */
+}
+
+
+.help-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1090;
+}
+
+.help-container.hidden {
+  display: none;
+}
+
+.help-card {
+  background: var(--secondary-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.help-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.close-btn {
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+  gap: 1rem;
+}
+
+.flashcard {
+  background: var(--tertiary-bg);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.flashcard .label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.flashcard .value {
+  font-size: 0.9rem;
+}
+
+}
+
 .nav button.nav-btn:hover,
 .nav button.nav-btn:focus {
   background-color: rgba(238,242,255,0.9);
@@ -468,30 +555,6 @@ input[type="radio"] {
   justify-content: flex-end;
   gap: 1rem;
 }
-/* ===== FIX SIMULATION LAYOUT ===== */
-.simulation-layout {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100% !important;
-  gap: 28px !important;
-}
-
-/* Make each card/plot take full width */
-.simulation-layout > div {
-  width: 100% !important;
-}
-
-/* Individual plot containers */
-#constellationPlot,
-#waveformPlot,
-#bitCompare,
-.stage,
-#detailedInfo {
-  width: 100% !important;
-  max-width: 100% !important;
-  display: block !important;
-}
-
 
 /* ============================================
    TABLES
@@ -1207,9 +1270,11 @@ footer .container {
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.9;
+    transform: scale(1.02);
   }
 }
 
@@ -1223,7 +1288,7 @@ footer .container {
 }
 
 .pulse {
-  animation: pulse 2s infinite;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .glow {
@@ -1273,6 +1338,68 @@ footer .container {
 .input-group input[type="number"],select,input[type="text"]{width:100%;padding:10px;border:2px solid #e6e8ff;border-radius:8px}
 .slider-row{display:flex;align-items:center;gap:12px}
 .slider-row input[type="range"]{flex:1}
+
+/* custom oscilloscope‑style sliders */
+.input-group {
+  margin-bottom: 1.5rem;
+}
+.input-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.slider-value {
+  display: block;
+  color: #00fff7;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 6px rgba(0,255,247,0.4);
+  background-image: linear-gradient(90deg,#00fff7,#00fff7);
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.2s ease, box-shadow 0.2s ease;
+}
+input[type=range]:hover {
+  box-shadow: 0 0 12px rgba(0,255,247,0.6);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00fff7;
+  box-shadow: 0 0 6px rgba(0,255,247,0.8);
+  transition: box-shadow 0.2s ease;
+  margin-top: -6px;
+}
+input[type=range]:active::-webkit-slider-thumb {
+  box-shadow: 0 0 14px rgba(0,255,247,1);
+}
+input[type=range]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00fff7;
+  box-shadow: 0 0 6px rgba(0,255,247,0.8);
+  transition: box-shadow 0.2s ease;
+}
+
+/* fill track proportionally */
+input[type=range]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* update background-size by JS when slider value changes */
+
 .small{font-size:0.9rem;color:#555}
 .btn{background:linear-gradient(90deg,#2f3ea3,#6a4ba8);color:#fff;padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:700}
 .results{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px}
@@ -1693,12 +1820,6 @@ footer {
   color: #00fff7;
   font-weight: 700;
 }
-
-.faq-q {
-  color: #00fff7;
-  font-weight: 600;
-  text-shadow: 0 0 6px rgba(0, 255, 247, 0.35);
-}
 .quiz-q {
   margin-bottom: 18px;
   padding: 12px;
@@ -1880,3 +2001,496 @@ footer {
 }
 
 /* ============================================
+/* USER-ADDED HELP STYLES (from user request) */
+/* HELP BUTTON */
+.help-btn {
+    background: #1a2a4a;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.help-btn i {
+    margin-right: 8px;
+}
+
+/* HOVER EFFECT */
+.help-btn:hover {
+    background: white;
+    color: #1a2a4a;
+}
+
+.help-btn:hover i {
+    color: #ffd700;
+    filter: drop-shadow(0 0 6px #ffd700);
+}
+
+/* CONTAINER */
+.help-container {
+    margin-top: 20px;
+}
+
+/* HIDDEN CLASS */
+.hidden {
+    display: none;
+}
+
+/* BIG BOX (BRUTAL STYLE) */
+.help-card {
+    background: #0f172a;
+    border: 4px solid #00fbff;
+    padding: 20px;
+    box-shadow: 10px 10px 0px #00fbff;
+}
+
+/* HEADER */
+.help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-btn {
+    font-size: 28px;
+    cursor: pointer;
+}
+
+/* GRID */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* FLASHCARDS */
+.flashcard {
+    background: white;
+    border: 2px solid black;
+    padding: 15px;
+    transition: 0.3s;
+}
+
+/* LABEL + VALUE */
+.label {
+    font-size: 12px;
+    color: gray;
+    display: block;
+}
+
+.value {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* HOVER ANIMATION */
+.flashcard:hover {
+    transform: translateY(-8px) rotate(-1deg);
+}
+
+/* ============================================
+   CRO (CATHODE RAY OSCILLOSCOPE) DISPLAY STYLES
+   ============================================ */
+
+/* CRT FLICKER ANIMATION */
+@keyframes crt-flicker {
+  0%, 100% { opacity: 0.98; }
+  50%      { opacity: 0.995; }
+}
+
+/* SCANLINE ANIMATION */
+@keyframes scanline-movement {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(10px); }
+}
+
+.cro-container {
+    background: #0a0e1a;
+    border: 3px solid #00fff7;
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 
+        inset 0 0 20px rgba(0, 255, 247, 0.1), 
+        0 0 20px rgba(0, 255, 247, 0.2),
+        0 0 40px rgba(0, 255, 247, 0.1);
+}
+
+/* CRO Header with Channel Label and Status */
+.cro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #0f172a 0%, #1a2540 100%);
+    border-bottom: 2px solid #00fff7;
+    padding: 10px 16px;
+    height: 40px;
+    box-shadow: 0 4px 12px rgba(0, 255, 247, 0.2);
+}
+
+.cro-channel-label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-shadow: 
+        0 0 8px rgba(0, 255, 247, 0.8),
+        0 0 16px rgba(0, 255, 247, 0.4);
+    background: rgba(0, 255, 247, 0.05);
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 255, 247, 0.3);
+}
+
+.ch1-label { color: #00fff7; }
+.ch2-label { color: #ff88ff; }
+
+.ch1-label.inactive,
+.ch2-label.inactive {
+    opacity: 0.4;
+}
+.cro-status-indicators {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #e5e7eb;
+}
+
+.status-indicator {
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: #1a2a4a;
+    border: 1.5px solid #667eea;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.status-indicator.active {
+    background: #00ff88;
+    color: #050713;
+    box-shadow: 
+        0 0 12px rgba(0, 255, 136, 0.8),
+        inset 0 0 6px rgba(0, 255, 136, 0.3);
+    border-color: #00ff88;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.status-indicator:hover {
+    background: #2f4a7a;
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+}
+
+/* stop indicator when active should appear red */
+.status-indicator.stop-indicator.active {
+    background: #ff4c4c;
+    color: #050713;
+    box-shadow: 0 0 10px rgba(255, 76, 76, 0.6);
+    border-color: #ff4c4c;
+}
+
+.status-separator {
+    color: #667eea;
+    opacity: 0.5;
+    font-size: 14px;
+}
+
+/* CRO Display Wrapper (contains grid and waveform) */
+.cro-display-wrapper {
+    position: relative;
+    width: 100%;
+    height: 360px;
+    background: radial-gradient(ellipse at center, #0a0e1a, #050713);
+    border-bottom: 2px solid rgba(0, 255, 247, 0.3);
+    overflow: hidden;
+    box-shadow: 
+        inset 0 0 30px rgba(0, 0, 0, 0.8),
+        inset 0 2px 8px rgba(0, 255, 247, 0.1);
+    animation: crt-flicker 3s ease-in-out infinite;
+}
+
+/* ===== GRID OVERLAY SYSTEM ===== */
+
+.cro-grid-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Minor grid lines (10 divisions) */
+.cro-grid-overlay::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 247, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 247, 0.06) 1px, transparent 1px);
+    background-size: 10% 10%;
+    background-position: 0 0;
+}
+
+/* Major grid lines (larger divisions, brighter) */
+.cro-grid-overlay::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 247, 0.15) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, rgba(0, 255, 247, 0.15) 1.5px, transparent 1.5px);
+    background-size: 50% 50%;
+    background-position: 0 0;
+}
+
+/* Scanline overlay (CRT effect) */
+.cro-grid-overlay {
+    background-image: 
+        repeating-linear-gradient(
+            0deg,
+            rgba(0, 255, 247, 0.03) 0px,
+            rgba(0, 255, 247, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+    background-size: 100% 2px;
+    background-position: 0 0;
+    animation: scanline-movement 8s linear infinite;
+}
+
+/* Waveform Rendering Area */
+.cro-waveform-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+/* Canvas overlay used for real‑time oscilloscope rendering */
+.cro-waveform-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+/* PLOTLY WAVEFORM TRACE STYLING */
+#waveformPlot {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+#waveformPlot .plotly-graph-div {
+    filter: drop-shadow(0 0 4px rgba(0, 255, 247, 0.3));
+}
+
+#waveformPlot .slice {
+    filter: brightness(1.05) drop-shadow(0 0 2px rgba(0, 255, 247, 0.4));
+}
+
+/* Waveform line enhancement (path elements in Plotly) */
+#waveformPlot path {
+    stroke-width: 2px !important;
+    filter: blur(0.3px) drop-shadow(0 0 4px rgba(0, 255, 247, 0.6));
+}
+
+/* CRO Control Labels (Time/Div, Volt/Div indicators) */
+.cro-control-labels {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(90deg, #0f172a 0%, #1a2540 100%);
+    border-top: 2px solid rgba(0, 255, 247, 0.3);
+    padding: 12px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    box-shadow: inset 0 2px 6px rgba(0, 255, 247, 0.08);
+}
+
+.cro-control-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.cro-control-label {
+    color: #9aa4ff;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.cro-control-value {
+    color: #00fff7;
+    font-weight: 700;
+    font-size: 13px;
+    background: rgba(0, 255, 247, 0.12);
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 247, 0.3);
+    min-width: 70px;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    box-shadow: 
+        0 0 8px rgba(0, 255, 247, 0.2),
+        inset 0 1px 3px rgba(0, 255, 247, 0.1);
+}
+
+.cro-control-spacer {
+    flex: 1;
+}
+
+/* Toggle noisy signal checkbox styling */
+.cro-control-labels input[type="checkbox"],
+#ch1Toggle, #ch2Toggle {
+    accent-color: #00fff7;
+    cursor: pointer;
+}
+
+/* channel toggle labels */
+#ch1Toggle, #ch2Toggle {
+    margin-right: 6px;
+}
+
+#ch1Toggle:checked + label,
+#ch2Toggle:checked + label {
+    color: #00ff88;
+    font-weight: 700;
+}
+
+/* simulation state indicator */
+#simState {
+    font-family: 'Rajdhani', monospace;
+    font-size: 1rem;
+}
+.cro-control-labels label {
+    cursor: pointer;
+    user-select: none;
+    color: #e5e7eb;
+    font-size: 12px;
+}
+
+/* Reset zoom button styling */
+.cro-control-labels .btn {
+    background: linear-gradient(90deg, #2f3ea3, #1a2a4a);
+    border: 1px solid rgba(0, 255, 247, 0.3);
+    color: #00fff7;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 
+        0 0 8px rgba(0, 255, 247, 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.cro-control-labels .btn:hover {
+    background: linear-gradient(90deg, #3d4eb3, #2a3a5a);
+    box-shadow: 
+        0 0 12px rgba(0, 255, 247, 0.4),
+        inset 0 1px 3px rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.cro-control-labels .btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cro-display-wrapper {
+        height: 280px;
+    }
+
+    .cro-grid-overlay::after {
+        background-size: 40% 40%;
+    }
+
+    .cro-control-labels {
+        gap: 12px;
+        padding: 10px 12px;
+    }
+
+    .cro-control-item {
+        font-size: 11px;
+    }
+
+    .cro-channel-label {
+        font-size: 12px;
+        padding: 3px 10px;
+    }
+
+    .status-indicator {
+        padding: 3px 8px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cro-display-wrapper {
+        height: 240px;
+    }
+
+    .cro-header {
+        padding: 8px 12px;
+        height: 36px;
+    }
+
+    .cro-channel-label {
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+
+    .cro-control-labels {
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    .cro-control-value {
+        font-size: 12px;
+        min-width: 60px;
+    }
+}
+
+/* ============================================
+   CONSTELLATION PLOT ENHANCEMENTS
+   ============================================ */
+
+#constellationPlot {
+    box-shadow: 
+        inset 0 0 20px rgba(0, 255, 247, 0.1),
+        0 0 20px rgba(0, 255, 247, 0.15) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+#constellationPlot .plotly-graph-div {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 247, 0.2));
+}
+
+/* Plotly marker styling */
+#constellationPlot .marker {
+    filter: drop-shadow(0 0 6px rgba(0, 255, 247, 0.3));
+}
+
+/* Legend dots with glow */
+.legend-dot {
+    filter: drop-shadow(0 0 6px currentColor) !important;
+}
+
