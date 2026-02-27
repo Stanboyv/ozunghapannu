@@ -423,6 +423,10 @@ For meaningful BER observation at high SNR, use a large number of bits
         <label for="snr">SNR (dB): <span id="snrVal" class="slider-value">20</span></label>
         <input id="snr" type="range" min="0" max="30" step="1" value="20" style="width:100%">
       </div>
+      <div class="input-group">
+        <label for="amplitude">Amplitude: <span id="ampVal" class="slider-value">1.0</span> V</label>
+        <input id="amplitude" type="range" min="0.5" max="5" step="0.1" value="1" style="width:100%">
+      </div>
     </div>
     <div class="controls-row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
       <div class="input-group">
@@ -440,11 +444,60 @@ For meaningful BER observation at high SNR, use a large number of bits
     <div class="controls-row" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <button id="runSim" class="btn">▶ Run Simulation</button>
       <button id="resetBtn" class="btn" style="background:#999;">Reset</button>
-      <div id="simState" style="color:#00fff7;font-weight:700;margin-left:1rem;">READY</div>
+      <div id="simState" style="color:#00ff88;font-weight:700;margin-left:1rem;">READY</div>
     </div>
     <div class="controls-row" style="margin-bottom:16px;display:flex;gap:20px;align-items:center;">
       <label><input id="ch1Toggle" type="checkbox" checked> CH1</label>
       <label><input id="ch2Toggle" type="checkbox" checked> CH2</label>
+    </div>
+
+    <!-- Channel Selector & Channel-Specific Controls -->
+    <div style="background:#1a2540;padding:14px;border-radius:10px;border:2px solid #00ff88;margin-bottom:16px;">
+      <h3 style="color:#00ff88;margin-top:0;">Channel Configuration</h3>
+      
+      <div style="margin-bottom:14px;display:flex;gap:10px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input id="chSelect1" type="radio" name="channelSelect" value="1" checked>
+          <span style="color:#00ff88;font-weight:700;">CH1 (Input Signal)</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input id="chSelect2" type="radio" name="channelSelect" value="2">
+          <span style="color:#00eaff;font-weight:700;">CH2 (QAM Output)</span>
+        </label>
+      </div>
+
+      <!-- CH1 Controls -->
+      <div id="ch1Controls" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px;">
+        <div class="input-group">
+          <label for="ch1Freq">CH1 Carrier Freq (Hz):</label>
+          <div><span id="ch1FreqVal" class="slider-value">1000</span></div>
+          <input id="ch1Freq" type="range" min="500" max="5000" step="100" value="1000" style="width:100%;">
+        </div>
+        <div class="input-group">
+          <label for="ch1Amp">CH1 Amplitude (V):</label>
+          <div><span id="ch1AmpVal" class="slider-value">1.0</span></div>
+          <input id="ch1Amp" type="range" min="0.1" max="5" step="0.1" value="1" style="width:100%;">
+        </div>
+        <div class="input-group">
+          <label for="ch1Phase">CH1 Phase (°):</label>
+          <div><span id="ch1PhaseVal" class="slider-value">0</span></div>
+          <input id="ch1Phase" type="range" min="0" max="360" step="15" value="0" style="width:100%;">
+        </div>
+      </div>
+
+      <!-- CH2 Controls -->
+      <div id="ch2Controls" style="display:none;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px;">
+        <div class="input-group">
+          <label for="ch2Offset">CH2 Amplitude Offset (V):</label>
+          <div><span id="ch2OffsetVal" class="slider-value">0.0</span></div>
+          <input id="ch2Offset" type="range" min="-2" max="2" step="0.1" value="0" style="width:100%;">
+        </div>
+        <div class="input-group">
+          <label for="ch2Scale">CH2 Scale Factor:</label>
+          <div><span id="ch2ScaleVal" class="slider-value">1.0</span></div>
+          <input id="ch2Scale" type="range" min="0.5" max="3" step="0.1" value="1" style="width:100%;">
+        </div>
+      </div>
     </div>
 
     <div class="results" style="margin-bottom:16px;">
@@ -518,12 +571,41 @@ For meaningful BER observation at high SNR, use a large number of bits
           <span class="cro-control-value" id="voltPerDiv">2.00 V</span>
         </div>
         <div class="cro-control-spacer"></div>
-        <div class="cro-control-item">
-          <label style="margin-right:10px;color:#e5e7eb;font-size:0.9rem;">
-            <input id="toggleNoisy" type="checkbox" checked> Noisy Signal
-          </label>
+        
+        <button id="zoomAuto" class="btn" style="background:#2f3ea3;padding:6px 10px;font-size:0.85rem;">🔍 Auto</button>
+        <button id="zoomIn" class="btn" style="background:#2f3ea3;padding:6px 10px;font-size:0.85rem;">Z+</button>
+        <button id="zoomOut" class="btn" style="background:#2f3ea3;padding:6px 10px;font-size:0.85rem;">Z−</button>
+        
+        <label style="margin-right:10px;color:#e5e7eb;font-size:0.9rem;">
+          <input id="toggleNoisy" type="checkbox" checked> Noisy
+        </label>
+        <button id="zoomReset" class="btn" style="background:#2f3ea3;padding:6px 10px;font-size:0.85rem;">↻ Reset</button>
+      </div>
+    </div>
+
+    <!-- Measurements & Analysis Panel -->
+    <div class="measurements-panel" style="background:#0a0e1a;border:1px solid #00fff7;border-radius:6px;padding:16px;margin:12px 0;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="border-right:1px solid rgba(0,255,247,0.2);padding-right:16px;">
+        <div style="color:#00ff88;font-weight:bold;margin-bottom:8px;">📊 CH1 Input Signal</div>
+        <div style="font-size:0.9rem;color:#e5e7eb;line-height:1.6;">
+          <div>Frequency: <span id="ch1FreqRead">500</span> Hz</div>
+          <div>Amplitude: <span id="ch1AmpRead">1.0</span> V</div>
+          <div>Phase: <span id="ch1PhaseRead">0</span>°</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,255,247,0.1);">
+            Peak Value: <span id="ch1PeakRead">1.0</span> V
+          </div>
         </div>
-        <button id="zoomReset" class="btn" style="background:#2f3ea3;padding:6px 10px;font-size:0.85rem;">Reset Zoom</button>
+      </div>
+      <div style="padding-left:0;">
+        <div style="color:#00eaff;font-weight:bold;margin-bottom:8px;">📈 CH2 QAM Output</div>
+        <div style="font-size:0.9rem;color:#e5e7eb;line-height:1.6;">
+          <div>Modulation: <span id="modOrderRead">4-QAM</span></div>
+          <div>Scale Factor: <span id="ch2ScaleRead">1.0</span>x</div>
+          <div>DC Offset: <span id="ch2OffsetRead">0.0</span> V</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,255,247,0.1);">
+            SNR: <span id="snrRead">20</span> dB
+          </div>
+        </div>
       </div>
     </div>
 
@@ -548,8 +630,89 @@ For meaningful BER observation at high SNR, use a large number of bits
           <h2>Simulation Help</h2>
           <span id="closeSimHelp" class="close-btn">&times;</span>
         </div>
-        <p>Use the sliders above to tweak SNR, carrier frequency, and symbol rate. Observe how changes affect constellation and BER/SER.</p>
+        <p>Use the sliders above to tweak SNR, carrier frequency, symbol rate and input amplitude. Observe how changes affect constellation, time‑waveform shape, and BER/SER.</p>
         <p><strong>Example starting values:</strong> SNR = 20 dB, Frequency = 2000 Hz, Symbol Rate = 2000 sym/s.</p>
+      </div>
+    </div>
+
+    <!-- Reference Guide for QAM Parameters & Expected Outputs -->
+    <button id="refGuideBtn" class="help-btn" style="margin-top:10px;"><i class="fas fa-book"></i> QAM REFERENCE GUIDE</button>
+    <div id="refGuideContainer" class="help-container hidden">
+      <div class="help-card">
+        <div class="help-header">
+          <h2>QAM Reference Guide: Expected Waveforms & Parameters</h2>
+          <span id="closeRefGuide" class="close-btn">&times;</span>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.95rem;">
+          <!-- 4-QAM Card -->
+          <div style="border:1px solid #00ff88;border-radius:4px;padding:12px;background:rgba(0,255,136,0.05);">
+            <div style="color:#00ff88;font-weight:bold;margin-bottom:8px;">📊 4-QAM (2 bits/symbol)</div>
+            <div style="color:#e5e7eb;line-height:1.6;">
+              <p style="margin:0 0 8px 0;"><strong>Constellation:</strong> 2×2 grid with points at I,Q ∈ {±1}</p>
+              <p style="margin:0 0 8px 0;"><strong>Typical Peak Amplitude:</strong> √2 ≈ 1.41 V</p>
+              <p style="margin:0 0 8px 0;"><strong>Test Parameters:</strong></p>
+              <div style="background:rgba(0,255,247,0.1);padding:8px;margin:8px 0;border-radius:2px;font-family:monospace;font-size:0.85rem;">
+                Ch1 Freq: 1000 Hz<br/>
+                Ch1 Amp: 1.4 V<br/>
+                Ch1 Phase: 0°<br/>
+                SNR: 20 dB
+              </div>
+            </div>
+          </div>
+
+          <!-- 16-QAM Card -->
+          <div style="border:1px solid #00eaff;border-radius:4px;padding:12px;background:rgba(0,234,255,0.05);">
+            <div style="color:#00eaff;font-weight:bold;margin-bottom:8px;">📊 16-QAM (4 bits/symbol)</div>
+            <div style="color:#e5e7eb;line-height:1.6;">
+              <p style="margin:0 0 8px 0;"><strong>Constellation:</strong> 4×4 grid with points at I,Q ∈ {±1, ±3}</p>
+              <p style="margin:0 0 8px 0;"><strong>Typical Peak Amplitude:</strong> 3√2 ≈ 4.24 V</p>
+              <p style="margin:0 0 8px 0;"><strong>Test Parameters:</strong></p>
+              <div style="background:rgba(0,255,247,0.1);padding:8px;margin:8px 0;border-radius:2px;font-family:monospace;font-size:0.85rem;">
+                Ch1 Freq: 1500 Hz<br/>
+                Ch1 Amp: 4.2 V<br/>
+                Ch1 Phase: 45°<br/>
+                SNR: 20 dB
+              </div>
+            </div>
+          </div>
+
+          <!-- 64-QAM Card -->
+          <div style="border:1px solid #9aa4ff;border-radius:4px;padding:12px;background:rgba(154,164,255,0.05);">
+            <div style="color:#9aa4ff;font-weight:bold;margin-bottom:8px;">📊 64-QAM (6 bits/symbol)</div>
+            <div style="color:#e5e7eb;line-height:1.6;">
+              <p style="margin:0 0 8px 0;"><strong>Constellation:</strong> 8×8 grid with points at I,Q ∈ {±1, ±3, ±5, ±7}</p>
+              <p style="margin:0 0 8px 0;"><strong>Typical Peak Amplitude:</strong> 7√2 ≈ 9.90 V</p>
+              <p style="margin:0 0 8px 0;"><strong>Test Parameters:</strong></p>
+              <div style="background:rgba(0,255,247,0.1);padding:8px;margin:8px 0;border-radius:2px;font-family:monospace;font-size:0.85rem;">
+                Ch1 Freq: 2000 Hz<br/>
+                Ch1 Amp: 5.0 V (scaled)<br/>
+                Ch1 Phase: 90°<br/>
+                SNR: 25 dB
+              </div>
+            </div>
+          </div>
+
+          <!-- 256-QAM Card -->
+          <div style="border:1px solid #ff9aa4;border-radius:4px;padding:12px;background:rgba(255,154,164,0.05);">
+            <div style="color:#ff9aa4;font-weight:bold;margin-bottom:8px;">📊 256-QAM (8 bits/symbol)</div>
+            <div style="color:#e5e7eb;line-height:1.6;">
+              <p style="margin:0 0 8px 0;"><strong>Constellation:</strong> 16×16 grid with points at I,Q ∈ {±1, ±3, ±5...±15}</p>
+              <p style="margin:0 0 8px 0;"><strong>Typical Peak Amplitude:</strong> 15√2 ≈ 21.2 V</p>
+              <p style="margin:0 0 8px 0;"><strong>Test Parameters:</strong></p>
+              <div style="background:rgba(0,255,247,0.1);padding:8px;margin:8px 0;border-radius:2px;font-family:monospace;font-size:0.85rem;">
+                Ch1 Freq: 2000 Hz<br/>
+                Ch1 Amp: 4.0 V (scaled)<br/>
+                Ch1 Phase: 180°<br/>
+                SNR: 30 dB
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;padding:12px;background:rgba(0,255,247,0.08);border-radius:4px;border-left:3px solid #00fff7;">
+          <p style="margin:0;color:#c7d2ff;font-size:0.9rem;"><strong>💡 How to Use:</strong> Copy the "Test Parameters" values into CH1 controls above, then click RUN to observe the exact constellation pattern. Use zoom in/out buttons to verify peak amplitudes and symbol spacing match expectations.</p>
+        </div>
       </div>
     </div>
 
@@ -729,6 +892,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetPage = document.getElementById(btn.dataset.page);
     targetPage.classList.add('active');
 
+    // if simulation tab becomes visible, update canvas size
+    if (btn.dataset.page === 'simulation') {
+      resizeWaveformCanvas();
+    }
+
     // reset any scrolling so each section starts at top
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.body.scrollTop = 0;       // for Safari
@@ -742,12 +910,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const numBitsEl = document.getElementById('numBits');
   const snrEl = document.getElementById('snr');
   const snrVal = document.getElementById('snrVal');
+  const amplitude = document.getElementById('amplitude');
+  const ampVal = document.getElementById('ampVal');
   const carrierFreq = document.getElementById('carrierFreq');
   const symbolRate = document.getElementById('symbolRate');
   const runBtn = document.getElementById('runSim');
   const resetBtn = document.getElementById('resetBtn');
   const toggleNoisy = document.getElementById('toggleNoisy');
   const zoomReset = document.getElementById('zoomReset');
+  const zoomAuto = document.getElementById('zoomAuto');
+  const zoomIn = document.getElementById('zoomIn');
+  const zoomOut = document.getElementById('zoomOut');
 
   // Outputs
   const outTotalBits = document.getElementById('outTotalBits');
@@ -811,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const waveformCanvas = document.getElementById('waveformCanvas');
   if (waveformDiv) waveformDiv.style.display = 'none';  // hide legacy plot
   let wfCtx = null;
-  let waveformRunning = true;
+  let waveformRunning = false; // start stopped until user clicks run
   let sweepOffset = 0;
   let lastFrameTime = performance.now();
   
@@ -821,6 +994,14 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // waveform data storage for CH2
   let lastCleanWave = null;
+  
+  // zoom and pan state
+  let zoomScale = 1.0; // 1 = normal, >1 = zoomed in, <1 = zoomed out
+  let panX = 0; // horizontal pan offset
+  let panY = 0; // vertical pan offset
+  let autoScaleEnabled = true;
+  const MIN_ZOOM = 0.5;
+  const MAX_ZOOM = 4.0;
 
   function resizeWaveformCanvas() {
     if (waveformCanvas) {
@@ -850,13 +1031,152 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ===== CHANNEL SELECTOR & PARAMETER CONTROLS =====
+  let selectedChannel = '1'; // default to CH1
+  
+  // Get channel control elements
+  const chSelect1 = document.getElementById('chSelect1');
+  const chSelect2 = document.getElementById('chSelect2');
+  const ch1Controls = document.getElementById('ch1Controls');
+  const ch2Controls = document.getElementById('ch2Controls');
+  
+  // CH1 parameters
+  const ch1Freq = document.getElementById('ch1Freq');
+  const ch1FreqVal = document.getElementById('ch1FreqVal');
+  const ch1Amp = document.getElementById('ch1Amp');
+  const ch1AmpVal = document.getElementById('ch1AmpVal');
+  const ch1Phase = document.getElementById('ch1Phase');
+  const ch1PhaseVal = document.getElementById('ch1PhaseVal');
+  
+  // CH2 parameters
+  const ch2Offset = document.getElementById('ch2Offset');
+  const ch2OffsetVal = document.getElementById('ch2OffsetVal');
+  const ch2Scale = document.getElementById('ch2Scale');
+  const ch2ScaleVal = document.getElementById('ch2ScaleVal');
+  
+  // Channel selector: show/hide controls based on selection
+  if (chSelect1 && chSelect2) {
+    chSelect1.addEventListener('change', () => {
+      if (chSelect1.checked) {
+        selectedChannel = '1';
+        ch1Controls.style.display = 'grid';
+        ch2Controls.style.display = 'none';
+        // highlight CH1 in CRO header
+        if (labelCH1 && labelCH2) {
+          labelCH1.style.opacity = '1';
+          labelCH1.style.fontWeight = '900';
+          labelCH2.style.opacity = '0.5';
+          labelCH2.style.fontWeight = '700';
+        }
+      }
+    });
+    chSelect2.addEventListener('change', () => {
+      if (chSelect2.checked) {
+        selectedChannel = '2';
+        ch1Controls.style.display = 'none';
+        ch2Controls.style.display = 'grid';
+        // highlight CH2 in CRO header
+        if (labelCH1 && labelCH2) {
+          labelCH2.style.opacity = '1';
+          labelCH2.style.fontWeight = '900';
+          labelCH1.style.opacity = '0.5';
+          labelCH1.style.fontWeight = '700';
+        }
+      }
+    });
+    // Set initial state
+    labelCH1.style.opacity = '1';
+    labelCH1.style.fontWeight = '900';
+    labelCH2.style.opacity = '0.5';
+    labelCH2.style.fontWeight = '700';
+  }
+  
+  // CH1 parameter listeners
+  if (ch1Freq) {
+    ch1Freq.addEventListener('input', () => {
+      let v = Number(ch1Freq.value);
+      if (v < 500) v = 500;
+      if (v > 5000) v = 5000;
+      ch1Freq.value = v;
+      ch1FreqVal.textContent = v;
+      document.getElementById('ch1FreqRead').textContent = v;
+      const pct = ((v - 500) / (5000 - 500)) * 100;
+      ch1Freq.style.backgroundSize = pct + '% 100%';
+    });
+  }
+  if (ch1Amp) {
+    ch1Amp.addEventListener('input', () => {
+      let v = Number(ch1Amp.value);
+      if (v < 0.1) v = 0.1;
+      if (v > 5) v = 5;
+      ch1Amp.value = v;
+      ch1AmpVal.textContent = v.toFixed(1);
+      document.getElementById('ch1AmpRead').textContent = v.toFixed(1);
+      document.getElementById('ch1PeakRead').textContent = v.toFixed(1);
+      const pct = ((v - 0.1) / (5 - 0.1)) * 100;
+      ch1Amp.style.backgroundSize = pct + '% 100%';
+    });
+  }
+  if (ch1Phase) {
+    ch1Phase.addEventListener('input', () => {
+      let v = Number(ch1Phase.value);
+      if (v < 0) v = 0;
+      if (v > 360) v = 360;
+      ch1Phase.value = v;
+      ch1PhaseVal.textContent = v;
+      document.getElementById('ch1PhaseRead').textContent = v;
+      const pct = (v / 360) * 100;
+      ch1Phase.style.backgroundSize = pct + '% 100%';
+    });
+  }
+  
+  // CH2 parameter listeners
+  if (ch2Offset) {
+    ch2Offset.addEventListener('input', () => {
+      let v = Number(ch2Offset.value);
+      if (v < -2) v = -2;
+      if (v > 2) v = 2;
+      ch2Offset.value = v;
+      ch2OffsetVal.textContent = v.toFixed(1);
+      document.getElementById('ch2OffsetRead').textContent = v.toFixed(1);
+      const pct = ((v - (-2)) / (2 - (-2))) * 100;
+      ch2Offset.style.backgroundSize = pct + '% 100%';
+    });
+  }
+  if (ch2Scale) {
+    ch2Scale.addEventListener('input', () => {
+      let v = Number(ch2Scale.value);
+      if (v < 0.5) v = 0.5;
+      if (v > 3) v = 3;
+      ch2Scale.value = v;
+      ch2ScaleVal.textContent = v.toFixed(1);
+      document.getElementById('ch2ScaleRead').textContent = v.toFixed(1);
+      const pct = ((v - 0.5) / (3 - 0.5)) * 100;
+      ch2Scale.style.backgroundSize = pct + '% 100%';
+    });
+  }
+
   // store numeric display values for scaling
   // (SimulationEngine is a const defined earlier) — add properties directly
   SimulationEngine.timePerDiv = 5; // default ms
   SimulationEngine.voltPerDiv = 2; // default V
 
+  // Initialize measurement displays with default values
+  document.getElementById('ch1FreqRead').textContent = ch1Freq ? Number(ch1Freq.value) : '1000';
+  document.getElementById('ch1AmpRead').textContent = ch1Amp ? Number(ch1Amp.value).toFixed(1) : '1.0';
+  document.getElementById('ch1PhaseRead').textContent = ch1Phase ? Number(ch1Phase.value) : '0';
+  document.getElementById('ch1PeakRead').textContent = ch1Amp ? Number(ch1Amp.value).toFixed(1) : '1.0';
+  document.getElementById('ch2OffsetRead').textContent = ch2Offset ? Number(ch2Offset.value).toFixed(1) : '0.0';
+  document.getElementById('ch2ScaleRead').textContent = ch2Scale ? Number(ch2Scale.value).toFixed(1) : '1.0';
+  document.getElementById('modOrderRead').textContent = (Number(modSelect.value) || 4) + '-QAM';
+  document.getElementById('snrRead').textContent = Number(snrEl.value) || '20';
+
   function drawOscilloscope(timestamp) {
     if (!wfCtx) return;
+    // check for resize if container size changed
+    if (waveformCanvas.width !== waveformCanvas.clientWidth || waveformCanvas.height !== waveformCanvas.clientHeight) {
+      resizeWaveformCanvas();
+    }
     const dt = timestamp - lastFrameTime;
     lastFrameTime = timestamp;
 
@@ -873,25 +1193,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // draw waveform
       const fc = Number(carrierFreq.value); // Hz
-      const amp = 1; // normalized
+      const amp = amplitude ? Number(amplitude.value) : 1; // user-controlled amplitude
       const heightHalf = waveformCanvas.height / 2;
       const voltScale = SimulationEngine.voltPerDiv;
       const pxPerVolt = waveformCanvas.height / (divisions * voltScale);
 
-      wfCtx.strokeStyle = '#00ff00';
+      // common line styling + glow
       wfCtx.lineWidth = 2;
       wfCtx.lineJoin = 'round';
       wfCtx.lineCap = 'round';
-      // draw selected channels in separate passes
+
       if (showCH1) {
-        wfCtx.strokeStyle = '#00ff00';
+        wfCtx.strokeStyle = '#00ff88'; // neon green
+        wfCtx.shadowColor = 'rgba(0,255,136,0.6)';
+        wfCtx.shadowBlur = 8;
         wfCtx.beginPath();
         for (let x = 0; x < waveformCanvas.width; x++) {
           const t = ((x + sweepOffset) / pxPerMs) / 1000; // seconds
-          const snr = Number(snrEl.value);
-          const noiseStd = 1 / Math.sqrt(Math.pow(10, snr / 10));
-          const noise = (Math.random() * 2 - 1) * noiseStd * 0.1;
-          const y1 = amp * Math.sin(2 * Math.PI * fc * t) + noise;
+          const fc_ch1 = Number(ch1Freq.value); // Hz (user-controlled)
+          const amp_ch1 = Number(ch1Amp.value); // user amplitude
+          const phase_ch1 = Number(ch1Phase.value) * Math.PI / 180; // convert to radians
+          // clean sinusoid: y = A * sin(2πf*t + φ)
+          const y1 = amp_ch1 * Math.sin(2 * Math.PI * fc_ch1 * t + phase_ch1);
           const yPx = heightHalf - y1 * pxPerVolt;
           if (x === 0) wfCtx.moveTo(x, yPx);
           else wfCtx.lineTo(x, yPx);
@@ -899,19 +1222,27 @@ document.addEventListener('DOMContentLoaded', () => {
         wfCtx.stroke();
       }
       if (showCH2 && lastCleanWave) {
-        wfCtx.strokeStyle = '#ff88ff';
+        wfCtx.strokeStyle = '#00eaff'; // cyan/blue
+        wfCtx.shadowColor = 'rgba(0,234,255,0.6)';
+        wfCtx.shadowBlur = 8;
         wfCtx.beginPath();
         const fs = lastCleanWave.fs;
+        const ch2_offset = ch2Offset ? Number(ch2Offset.value) : 0;
+        const ch2_scale = ch2Scale ? Number(ch2Scale.value) : 1;
         for (let x = 0; x < waveformCanvas.width; x++) {
           const t = ((x + sweepOffset) / pxPerMs) / 1000;
           const idx = Math.floor(t * fs) % lastCleanWave.y.length;
-          const y2 = lastCleanWave.y[idx];
+          // scale and offset CH2 signal
+          const y2 = (lastCleanWave.y[idx] || 0) * ch2_scale + ch2_offset;
           const y2Px = heightHalf - y2 * pxPerVolt;
           if (x === 0) wfCtx.moveTo(x, y2Px);
           else wfCtx.lineTo(x, y2Px);
         }
         wfCtx.stroke();
       }
+      // reset shadow so other drawings not affected
+      wfCtx.shadowBlur = 0;
+      wfCtx.shadowColor = 'transparent';
     }
     requestAnimationFrame(drawOscilloscope);
   }
@@ -933,8 +1264,13 @@ document.addEventListener('DOMContentLoaded', () => {
       waveformRunning = false;
       stopIndicator.classList.add('active');
       runIndicator.classList.remove('active');
-      document.getElementById('simState').textContent = 'STOPPED';
+      document.getElementById('simState').textContent = 'READY';
     });
+
+    // start in stopped state
+    runIndicator.classList.remove('active');
+    stopIndicator.classList.add('active');
+    document.getElementById('simState').textContent = 'READY';
   }
 
   // update SNR label and enforce bounds
@@ -946,30 +1282,26 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateCRODisplayIndicators() {
     const symbolRateVal = Number(symbolRate.value);
     const snrVal = Number(snrEl.value);
+    const ampValNum = amplitude ? Number(amplitude.value) : 1;
     
-    // Time/Div calculation: based on symbol duration
-    // Time per symbol = 1000 / symbolRate (in ms)
-    // Display approximately 4 symbols per screen, so Time/Div = symbol_duration / 4
+    // Time/Div calculation: based on symbol duration and zoom level
     const timePerSymbolMs = 1000 / symbolRateVal;
-    const timePerDiv = timePerSymbolMs / 4;
+    let timePerDiv = timePerSymbolMs / 4;
+    timePerDiv = timePerDiv / zoomScale; // zoom in = smaller time per division = more detail
     const timePerDivStr = timePerDiv < 0.1 
       ? (timePerDiv * 1000).toFixed(2) + ' µs' 
       : timePerDiv.toFixed(2) + ' ms';
     
     document.getElementById('timePerDiv').textContent = timePerDivStr;
-    // store numeric value for waveform
     SimulationEngine.timePerDiv = timePerDiv;
     
-    // Volt/Div calculation: based on SNR and expected signal amplitude
-    // Higher SNR = tighter clustering = smaller Volt/Div for visibility
-    // Lower SNR = wider spreading = larger Volt/Div to capture noise
-    // Base amplitude for normalized QAM constellation is roughly ±3
-    const baseVoltPerDiv = 2.0; // default scale
-    const snrFactor = Math.max(0.5, 3 - (snrVal / 15)); // adjust scale based on SNR
-    const voltPerDiv = baseVoltPerDiv * snrFactor;
+    // Volt/Div calculation: incorporate amplitude, noise level, and zoom
+    const baseVoltPerDiv = ampValNum || 1.0;
+    const snrFactor = Math.max(0.5, 3 - (snrVal / 15));
+    let voltPerDiv = baseVoltPerDiv * snrFactor;
+    voltPerDiv = voltPerDiv / zoomScale; // zoom in = smaller voltage per division = more detail
     
     document.getElementById('voltPerDiv').textContent = voltPerDiv.toFixed(2) + ' V';
-    // store numeric value for waveform
     SimulationEngine.voltPerDiv = voltPerDiv;
   }
 
@@ -979,12 +1311,56 @@ document.addEventListener('DOMContentLoaded', () => {
     if (v > 30) v = 30;
     snrEl.value = v;
     snrVal.textContent = v;
+    document.getElementById('snrRead').textContent = v;
     // update track fill
     const pct = ((v - 0) / (30 - 0)) * 100;
     snrEl.style.backgroundSize = pct + '% 100%';
     updateCRODisplayIndicators();
-    document.getElementById('simState').textContent = 'READY';
+    if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
+    // update constellation in real-time if simulation data exists
+    if (lastCleanWave) {
+      const M = Number(modSelect.value);
+      const cfg = getConfig(M);
+      const constellation = generateConstellationPoints(M);
+      const symbolIndices = bitsToSymbolIndices(randomBits(cfg.bitsPerSymbol * 16), cfg.bitsPerSymbol);
+      const txIQ = symbolsToIQ(symbolIndices, constellation);
+      const rxIQ = addAWGNtoSymbols(txIQ, v);
+      plotConstellation(constellation, txIQ, rxIQ);
+    }
   });
+
+  // Update constellation when modulation changes
+  modSelect.addEventListener('change', () => {
+    const modValue = Number(modSelect.value);
+    document.getElementById('modOrderRead').textContent = modValue + '-QAM';
+    if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
+    if (lastCleanWave) {
+      const M = modValue;
+      const cfg = getConfig(M);
+      const constellation = generateConstellationPoints(M);
+      const snr = Number(snrEl.value);
+      const symbolIndices = bitsToSymbolIndices(randomBits(cfg.bitsPerSymbol * 16), cfg.bitsPerSymbol);
+      const txIQ = symbolsToIQ(symbolIndices, constellation);
+      const rxIQ = addAWGNtoSymbols(txIQ, snr);
+      plotConstellation(constellation, txIQ, rxIQ);
+    }
+  });
+
+  // amplitude slider updates
+  if (amplitude) {
+    amplitude.addEventListener('input', () => {
+      let v = Number(amplitude.value);
+      if (v < 0.5) v = 0.5;
+      if (v > 5) v = 5;
+      amplitude.value = v;
+      if (ampVal) ampVal.textContent = v.toFixed(1);
+      // update fill
+      const pct = ((v - 0.5) / (5 - 0.5)) * 100;
+      amplitude.style.backgroundSize = pct + '% 100%';
+      updateCRODisplayIndicators();
+      if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
+    });
+  }
 
   // new slider value displays with live update and bounds enforcement
   const cfVal = document.getElementById('cfVal');
@@ -998,7 +1374,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cfVal.textContent = v;
     const pct = ((v - 500) / (5000 - 500)) * 100;
     carrierFreq.style.backgroundSize = pct + '% 100%';
-    document.getElementById('simState').textContent = 'READY';
+    if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
   });
 
   symbolRate.addEventListener('input', () => {
@@ -1010,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pct = ((v - 500) / (5000 - 500)) * 100;
     symbolRate.style.backgroundSize = pct + '% 100%';
     updateCRODisplayIndicators();
-    document.getElementById('simState').textContent = 'READY';
+    if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
   });
 
   // help toggling for simulation-specific help
@@ -1027,6 +1403,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     simHelpContainer.addEventListener('click', e => {
       if (e.target === simHelpContainer) simHelpContainer.classList.add('hidden');
+    });
+  }
+
+  // Reference guide toggle
+  const refGuideBtn = document.getElementById('refGuideBtn');
+  const refGuideContainer = document.getElementById('refGuideContainer');
+  const closeRefGuide = document.getElementById('closeRefGuide');
+  if (refGuideBtn && refGuideContainer && closeRefGuide) {
+    refGuideBtn.addEventListener('click', () => {
+      refGuideContainer.classList.remove('hidden');
+      refGuideContainer.scrollIntoView({ behavior: 'smooth' });
+    });
+    closeRefGuide.addEventListener('click', () => {
+      refGuideContainer.classList.add('hidden');
+    });
+    refGuideContainer.addEventListener('click', e => {
+      if (e.target === refGuideContainer) refGuideContainer.classList.add('hidden');
     });
   }
 
@@ -1178,10 +1571,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Plot waveform (clean + noisy overlay)
   function plotWaveform(cleanWave, noisyWave) {
-    const cleanTrace = {x: cleanWave.t, y: cleanWave.y, mode:'lines', name:'Clean QAM waveform', line:{width:1}};
+    const ampScale = amplitude ? Number(amplitude.value) : 1;
+    const scaledCleanY = cleanWave.y.map(v => v * ampScale);
+    const cleanTrace = {x: cleanWave.t, y: scaledCleanY, mode:'lines', name:'Clean QAM waveform', line:{width:1, color:'#00ff88'}};
     const traces = [cleanTrace];
     if(toggleNoisy.checked && noisyWave){
-      traces.push({x: noisyWave.t, y: noisyWave.y, mode:'lines', name:'Noisy waveform', line:{width:1, dash:'dot'}});
+      const scaledNoisyY = noisyWave.y.map(v => v * ampScale);
+      traces.push({x: noisyWave.t, y: scaledNoisyY, mode:'lines', name:'Noisy waveform', line:{width:1, dash:'dot', color:'#00eaff'}});
     }
     const layout = {
   ...PLOTLY_DARK_THEME,
@@ -1206,6 +1602,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Main simulation runner
   runBtn.addEventListener('click', ()=> {
+    // ensure canvas is sized correctly (might have been hidden earlier)
+    resizeWaveformCanvas();
+    // start waveform if not already running
+    waveformRunning = true;
+    sweepOffset = 0; // consistent starting phase
+    lastFrameTime = performance.now();
+    // update RUN/STOP indicator buttons
+    if (runIndicator && stopIndicator) {
+      runIndicator.classList.add('active');
+      stopIndicator.classList.remove('active');
+    }
+    document.getElementById('simState').textContent = 'RUNNING';
+
     const M = Number(modSelect.value);
     const cfg = getConfig(M);
     const constellation = generateConstellationPoints(M);
@@ -1335,8 +1744,33 @@ Channel & Timing:
     plotConstellation(constellation, txIQ, rxIQ);
     plotWaveform(cleanWave, noisyWave);
 
+    // zoom auto handler
+    zoomAuto.onclick = () => {
+      autoScaleEnabled = true;
+      updateCRODisplayIndicators();
+    };
+
+    // zoom in handler
+    zoomIn.onclick = () => {
+      zoomScale = Math.min(MAX_ZOOM, zoomScale * 1.5);
+      autoScaleEnabled = false;
+      updateCRODisplayIndicators();
+    };
+
+    // zoom out handler
+    zoomOut.onclick = () => {
+      zoomScale = Math.max(MIN_ZOOM, zoomScale / 1.5);
+      autoScaleEnabled = false;
+      updateCRODisplayIndicators();
+    };
+
     // zoom reset binds
     zoomReset.onclick = ()=> {
+      zoomScale = 1.0;
+      panX = 0;
+      panY = 0;
+      autoScaleEnabled = true;
+      updateCRODisplayIndicators();
       Plotly.relayout(waveformDiv, {
         'xaxis.autorange': true,
         'yaxis.autorange': true
@@ -1351,6 +1785,8 @@ Channel & Timing:
   numBitsEl.value = 1024;
   snrEl.value = 20; 
   snrVal.textContent = '20';
+  amplitude.value = 1;
+  if (ampVal) ampVal.textContent = '1.0';
   carrierFreq.value = 2000;
   symbolRate.value = 2000;
   cfVal.textContent = '2000';
@@ -1360,6 +1796,7 @@ Channel & Timing:
 
   // reset slider fills
   snrEl.style.backgroundSize = ((snrEl.value - 0)/(30-0))*100 + '% 100%';
+  amplitude.style.backgroundSize = ((amplitude.value - 0.5)/(5-0.5))*100 + '% 100%';
   carrierFreq.style.backgroundSize = ((carrierFreq.value - 500)/(5000-500))*100 + '% 100%';
   symbolRate.style.backgroundSize = ((symbolRate.value - 500)/(5000-500))*100 + '% 100%';
 
@@ -1372,12 +1809,12 @@ Channel & Timing:
   // update CRO display indicators
   updateCRODisplayIndicators();
 
-  // reset waveform sweep position and resume running
+  // reset waveform sweep position and stop running
   sweepOffset = 0;
-  waveformRunning = true;
+  waveformRunning = false;
   if (runIndicator && stopIndicator) {
-    runIndicator.classList.add('active');
-    stopIndicator.classList.remove('active');
+    runIndicator.classList.remove('active');
+    stopIndicator.classList.add('active');
   }
   document.getElementById('simState').textContent = 'READY';
 
@@ -1402,10 +1839,12 @@ Channel & Timing:
 
   // initial UI values
   snrVal.textContent = snrEl.value;
+  if (ampVal) ampVal.textContent = amplitude.value;
   if (cfVal) cfVal.textContent = carrierFreq.value;
   if (srVal) srVal.textContent = symbolRate.value;
   // set initial slider fill
   snrEl.style.backgroundSize = ((snrEl.value - 0)/(30-0))*100 + '% 100%';
+  amplitude.style.backgroundSize = ((amplitude.value - 0.5)/(5-0.5))*100 + '% 100%';
   carrierFreq.style.backgroundSize = ((carrierFreq.value - 500)/(5000-500))*100 + '% 100%';
   symbolRate.style.backgroundSize = ((symbolRate.value - 500)/(5000-500))*100 + '% 100%';
   // initialize CRO display indicators

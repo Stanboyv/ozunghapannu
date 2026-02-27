@@ -2136,17 +2136,22 @@ footer {
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 3px;
+    /* glow follows text color via currentColor */
     text-shadow: 
-        0 0 8px rgba(0, 255, 247, 0.8),
-        0 0 16px rgba(0, 255, 247, 0.4);
-    background: rgba(0, 255, 247, 0.05);
+        0 0 8px currentColor,
+        0 0 16px currentColor;
+    background: rgba(255, 255, 255, 0.05);
     padding: 4px 12px;
     border-radius: 6px;
-    border: 1px solid rgba(0, 255, 247, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.ch1-label { color: #00fff7; }
-.ch2-label { color: #ff88ff; }
+.cro-channel-label:not(.inactive) {
+    box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+}
+
+.ch1-label { color: #00ff88; }
+.ch2-label { color: #00eaff; }
 
 .ch1-label.inactive,
 .ch2-label.inactive {
