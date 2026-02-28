@@ -430,19 +430,20 @@ For meaningful BER observation at high SNR, use a large number of bits
     </div>
     <div class="controls-row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
       <div class="input-group">
-        <label for="carrierFreq">Carrier Frequency (Hz)</label>
-        <div><span id="cfVal" class="slider-value">2000</span></div>
-        <input id="carrierFreq" type="range" min="500" max="5000" step="100" value="2000" style="width:100%">
+        <label for="carrierFreq">Carrier Frequency (kHz)</label>
+        <div><span id="cfVal" class="slider-value">5</span></div>
+        <input id="carrierFreq" type="range" min="0.5" max="10" step="0.5" value="5" style="width:100%">
       </div>
       <div class="input-group">
-        <label for="symbolRate">Symbol Rate (symbols/sec)</label>
-        <div><span id="srVal" class="slider-value">2000</span></div>
-        <input id="symbolRate" type="range" min="500" max="5000" step="100" value="2000" style="width:100%">
+        <label for="symbolRate">Symbol Duration (sec)</label>
+        <div><span id="srVal" class="slider-value">2</span></div>
+        <input id="symbolRate" type="range" min="0.5" max="5" step="0.5" value="2" style="width:100%">
       </div>
     </div>
 
     <div class="controls-row" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-      <button id="runSim" class="btn">▶ Run Simulation</button>
+    <button id="runSim" class="btn">▶ Run Simulation</button>
+    <button id="demo16QAM" class="btn" title="Generate illustrative 16-QAM waveform">16‑QAM Demo</button>
       <button id="resetBtn" class="btn" style="background:#999;">Reset</button>
       <div id="simState" style="color:#00ff88;font-weight:700;margin-left:1rem;">READY</div>
     </div>
@@ -985,8 +986,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (waveformDiv) waveformDiv.style.display = 'none';  // hide legacy plot
   let wfCtx = null;
   let waveformRunning = false; // start stopped until user clicks run
-  let sweepOffset = 0;
-  let lastFrameTime = performance.now();
   
   // channel visibility flags
   let showCH1 = true;
@@ -1171,78 +1170,131 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modOrderRead').textContent = (Number(modSelect.value) || 4) + '-QAM';
   document.getElementById('snrRead').textContent = Number(snrEl.value) || '20';
 
+  // Global 16-QAM symbol sequence and oscilloscope time
+  let globalOSCTime = 0;
+  let qam16Symbols = []; // will hold {I, Q} for each symbol in sequence
+
+  // Generate a sequence of 16-QAM symbols (all 16 constellation points in repeating cycle)
+  function generate16QAMSymbolSequence() {
+    const points = [];
+    // 16-QAM constellation: I, Q ∈ {±1, ±3}
+    for (let q of [-3, -1, 1, 3]) {
+      for (let i of [-3, -1, 1, 3]) {
+        points.push({ I: i, Q: q });
+      }
+    }
+    // Repeat approximately 5 times for a longer animation loop
+    qam16Symbols = [];
+    for (let rep = 0; rep < 5; rep++) {
+      for (let p of points) {
+        qam16Symbols.push(p);
+      }
+    }
+  }
+  generate16QAMSymbolSequence(); // initialize on startup
+
+  // Global oscilloscope draw loop
   function drawOscilloscope(timestamp) {
     if (!wfCtx) return;
     // check for resize if container size changed
     if (waveformCanvas.width !== waveformCanvas.clientWidth || waveformCanvas.height !== waveformCanvas.clientHeight) {
       resizeWaveformCanvas();
     }
-    const dt = timestamp - lastFrameTime;
-    lastFrameTime = timestamp;
 
     if (waveformRunning) {
-      // update sweep position
-      const timeDiv = SimulationEngine.timePerDiv; // ms per division
-      const divisions = 10; // minor divisions across width
-      const pxPerMs = waveformCanvas.width / (divisions * timeDiv);
-      sweepOffset = (sweepOffset + dt * pxPerMs) % waveformCanvas.width;
-
-      // clear with slight persistence
-      wfCtx.fillStyle = 'rgba(5,7,19,0.12)';
+      // clear fully to keep traces stable and avoid ghosting/jitter
+      wfCtx.fillStyle = '#050713';
       wfCtx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
 
-      // draw waveform
-      const fc = Number(carrierFreq.value); // Hz
-      const amp = amplitude ? Number(amplitude.value) : 1; // user-controlled amplitude
-      const heightHalf = waveformCanvas.height / 2;
-      const voltScale = SimulationEngine.voltPerDiv;
-      const pxPerVolt = waveformCanvas.height / (divisions * voltScale);
+      // Channel positioning: CH1 upper half, CH2 lower half
+      const quarterH = waveformCanvas.height / 4;
+      const yBaseCH1 = quarterH;           // center of upper half
+      const yBaseCH2 = quarterH * 3;       // center of lower half
+      const pixelScale = 120; // pixels per unit time for smooth scaling
 
-      // common line styling + glow
+      // common line styling
       wfCtx.lineWidth = 2;
       wfCtx.lineJoin = 'round';
       wfCtx.lineCap = 'round';
 
+      // CH1: clean input sinusoid with adjustable input frequency (in Hz)
       if (showCH1) {
         wfCtx.strokeStyle = '#00ff88'; // neon green
         wfCtx.shadowColor = 'rgba(0,255,136,0.6)';
-        wfCtx.shadowBlur = 8;
+        wfCtx.shadowBlur = 4;
         wfCtx.beginPath();
+        const f_input = Number(ch1Freq.value); // Hz
+        const amp_ch1 = Number(ch1Amp.value);
+        const phase_ch1 = Number(ch1Phase.value) * Math.PI / 180;
         for (let x = 0; x < waveformCanvas.width; x++) {
-          const t = ((x + sweepOffset) / pxPerMs) / 1000; // seconds
-          const fc_ch1 = Number(ch1Freq.value); // Hz (user-controlled)
-          const amp_ch1 = Number(ch1Amp.value); // user amplitude
-          const phase_ch1 = Number(ch1Phase.value) * Math.PI / 180; // convert to radians
-          // clean sinusoid: y = A * sin(2πf*t + φ)
-          const y1 = amp_ch1 * Math.sin(2 * Math.PI * fc_ch1 * t + phase_ch1);
-          const yPx = heightHalf - y1 * pxPerVolt;
+          const t = globalOSCTime + x / pixelScale;
+          const y1 = amp_ch1 * Math.sin(2 * Math.PI * f_input * t + phase_ch1);
+          const yPx = yBaseCH1 - y1 * 50;
           if (x === 0) wfCtx.moveTo(x, yPx);
           else wfCtx.lineTo(x, yPx);
         }
         wfCtx.stroke();
+        // label CH1 at left
+        wfCtx.shadowBlur = 0;
+        wfCtx.fillStyle = '#00ff88';
+        wfCtx.font = Math.max(12, Math.round(waveformCanvas.height * 0.03)) + 'px sans-serif';
+        wfCtx.fillText('CH1: Input (' + f_input.toFixed(2) + ' Hz)', 6, yBaseCH1 - 8);
       }
-      if (showCH2 && lastCleanWave) {
+
+      // CH2: 16-QAM waveform with carrier modulation
+      if (showCH2 && qam16Symbols.length > 0) {
         wfCtx.strokeStyle = '#00eaff'; // cyan/blue
         wfCtx.shadowColor = 'rgba(0,234,255,0.6)';
-        wfCtx.shadowBlur = 8;
+        wfCtx.shadowBlur = 4;
         wfCtx.beginPath();
-        const fs = lastCleanWave.fs;
-        const ch2_offset = ch2Offset ? Number(ch2Offset.value) : 0;
-        const ch2_scale = ch2Scale ? Number(ch2Scale.value) : 1;
+        
+        const fc_kHz = Number(carrierFreq.value); // kHz
+        const fc = fc_kHz * 1000; // convert to Hz for modulation
+        const symbolDur = Number(symbolRate.value); // symbol duration in seconds
+        
         for (let x = 0; x < waveformCanvas.width; x++) {
-          const t = ((x + sweepOffset) / pxPerMs) / 1000;
-          const idx = Math.floor(t * fs) % lastCleanWave.y.length;
-          // scale and offset CH2 signal
-          const y2 = (lastCleanWave.y[idx] || 0) * ch2_scale + ch2_offset;
-          const y2Px = heightHalf - y2 * pxPerVolt;
+          const t = globalOSCTime + x / pixelScale;
+          
+          // Determine which symbol we're in and progress within that symbol
+          const symbolIndex = Math.floor(t / symbolDur) % qam16Symbols.length;
+          const timeInSymbol = (t % symbolDur) / symbolDur; // 0 to 1
+          const symbol = qam16Symbols[symbolIndex];
+          
+          // Smooth transition between symbol (amplitude ramping)
+          // Use a windowed approach to make transitions visible but smooth
+          let ampAtTime = 1.0;
+          if (timeInSymbol < 0.1) {
+            // ramp in
+            ampAtTime = timeInSymbol / 0.1;
+          } else if (timeInSymbol > 0.9) {
+            // ramp out
+            ampAtTime = (1 - timeInSymbol) / 0.1;
+          }
+          
+          // 16-QAM modulation: s(t) = amplitude * [I*cos(2πfc*t) - Q*sin(2πfc*t)]
+          const I = symbol.I;
+          const Q = symbol.Q;
+          const modSig = I * Math.cos(2 * Math.PI * fc * t) - Q * Math.sin(2 * Math.PI * fc * t);
+          const y2 = ampAtTime * modSig * (1 / Math.sqrt(10)); // normalize for display
+          const y2Px = yBaseCH2 - y2 * 50;
+          
           if (x === 0) wfCtx.moveTo(x, y2Px);
           else wfCtx.lineTo(x, y2Px);
         }
         wfCtx.stroke();
+        // label CH2 at left
+        wfCtx.shadowBlur = 0;
+        wfCtx.fillStyle = '#00eaff';
+        wfCtx.font = Math.max(12, Math.round(waveformCanvas.height * 0.03)) + 'px sans-serif';
+        wfCtx.fillText('CH2: 16-QAM (' + fc_kHz.toFixed(1) + ' kHz)', 6, yBaseCH2 - 8);
       }
-      // reset shadow so other drawings not affected
+
+      // reset shadow
       wfCtx.shadowBlur = 0;
       wfCtx.shadowColor = 'transparent';
+
+      // advance time smoothly for steady observation
+      globalOSCTime += 0.02;
     }
     requestAnimationFrame(drawOscilloscope);
   }
@@ -1368,22 +1420,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   carrierFreq.addEventListener('input', () => {
     let v = Number(carrierFreq.value);
-    if (v < 500) v = 500;
-    if (v > 5000) v = 5000;
+    if (v < 0.5) v = 0.5;
+    if (v > 10) v = 10;
     carrierFreq.value = v;
-    cfVal.textContent = v;
-    const pct = ((v - 500) / (5000 - 500)) * 100;
+    cfVal.textContent = v.toFixed(1);
+    const pct = ((v - 0.5) / (10 - 0.5)) * 100;
     carrierFreq.style.backgroundSize = pct + '% 100%';
     if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
   });
 
   symbolRate.addEventListener('input', () => {
     let v = Number(symbolRate.value);
-    if (v < 500) v = 500;
-    if (v > 5000) v = 5000;
+    if (v < 0.5) v = 0.5;
+    if (v > 5) v = 5;
     symbolRate.value = v;
-    srVal.textContent = v;
-    const pct = ((v - 500) / (5000 - 500)) * 100;
+    srVal.textContent = v.toFixed(1);
+    const pct = ((v - 0.5) / (5 - 0.5)) * 100;
     symbolRate.style.backgroundSize = pct + '% 100%';
     updateCRODisplayIndicators();
     if (!waveformRunning) document.getElementById('simState').textContent = 'READY';
@@ -1600,14 +1652,120 @@ document.addEventListener('DOMContentLoaded', () => {
     Plotly.react(waveformDiv, traces, layout, cfg);
   }
 
+  // AUTO-scale: reset oscilloscope time and regenerate QAM symbols for fresh view
+  function autoScaleCRO() {
+    // Reset oscilloscope time for fresh sweep
+    globalOSCTime = 0;
+    
+    // Regenerate 16-QAM symbol sequence
+    generate16QAMSymbolSequence();
+    
+    // Update CRO display indicators
+    autoScaleEnabled = true;
+    updateCRODisplayIndicators();
+
+    // ensure canvas is visible and animation running
+    resizeWaveformCanvas();
+    waveformRunning = true;
+    if (runIndicator && stopIndicator) { runIndicator.classList.add('active'); stopIndicator.classList.remove('active'); }
+    document.getElementById('simState').textContent = 'RUNNING';
+  }
+
+  // Generate a demonstrative 16-QAM waveform with visible carrier,
+  // discrete envelope steps (quantized to 4 levels), envelope changes
+  // from I/Q modulation, and phase discontinuities at symbol boundaries.
+  function generate16QAMDemo(opts = {}) {
+    const fc = Number(opts.fc || carrierFreq.value || 2000);
+    const symbolRateVal = Number(opts.symbolRate || symbolRate.value || 2000);
+    const samplesPerSymbol = opts.samplesPerSymbol || 128; // keep carrier visible
+    const Nsym = opts.nsymbols || 80;
+
+    const M = 16;
+    const cfg = getConfig(M);
+    const constellation = generateConstellationPoints(M);
+
+    // Build a deterministic repeating sequence of symbol indices for a clean, stable waveform
+    const symbolIndices = Array.from({length: Nsym}, (_,k) => k % M);
+    const txIQ = symbolsToIQ(symbolIndices, constellation);
+
+    // Compute raw magnitudes and quantize envelope into 4 discrete levels
+    const mags = txIQ.map(s => Math.sqrt(s.I * s.I + s.Q * s.Q));
+    const minR = Math.min(...mags);
+    const maxR = Math.max(...mags);
+    const scaleFactors = [0.6, 0.95, 1.4, 1.9]; // visually distinct envelope steps
+
+    // Sampling parameters
+    const Ts = 1 / symbolRateVal; // seconds per symbol
+    const fs = samplesPerSymbol / Ts;
+    const dt = 1 / fs;
+
+    const t = [];
+    const y = [];
+    let globalTime = 0;
+
+    // To produce phase discontinuities, each symbol's carrier phase is restarted (tau from 0)
+    for (let k = 0; k < txIQ.length; k++) {
+      const I = txIQ[k].I;
+      const Q = txIQ[k].Q;
+      const r = Math.sqrt(I * I + Q * Q);
+      // quantize normalized magnitude into 4 buckets
+      const norm = (r - minR) / (maxR - minR + 1e-12);
+      let idx = Math.floor(norm * 4);
+      if (idx < 0) idx = 0; if (idx > 3) idx = 3;
+      const ampStep = scaleFactors[idx];
+
+      // Optional small symbol-to-symbol phase jump for extra 'busyness'
+      const phaseJump = (k % 3 === 0) ? Math.PI * 0.25 : 0; // deterministic jumps every 3rd symbol
+
+      for (let n = 0; n < samplesPerSymbol; n++) {
+        const tau = n * dt; // local time inside symbol -> restarts at 0 producing discontinuity
+        // s(t) = A*(I*cos(2πfτ + φ_jump) - Q*sin(2πfτ + φ_jump))
+        const carrierArg = 2 * Math.PI * fc * tau + phaseJump;
+        const sample = ampStep * (I * Math.cos(carrierArg) - Q * Math.sin(carrierArg));
+        t.push(globalTime);
+        y.push(sample);
+        globalTime += dt;
+      }
+    }
+
+    // Package waveform with sampling frequency for canvas plotting
+    const wave = { t: t, y: y, fs: fs };
+    lastCleanWave = wave;
+
+    // Also prepare constellation traces for visual reference (no noise)
+    const txIQFull = txIQ; // transmitted IQ points
+    const rxIQ = txIQFull.slice(); // noise-free receive points
+
+    // Update UI and plots (noise-free)
+    plotConstellation(constellation, txIQFull, rxIQ);
+    plotWaveform(wave, null);
+
+    // Start canvas animation if not running so canvas shows the demo
+    waveformRunning = true;
+    document.getElementById('simState').textContent = 'RUNNING';
+    if (runIndicator && stopIndicator) { runIndicator.classList.add('active'); stopIndicator.classList.remove('active'); }
+
+    return wave;
+  }
+
+  // Wire demo button
+  const demoBtn = document.getElementById('demo16QAM');
+  if (demoBtn) {
+    demoBtn.addEventListener('click', () => {
+      // set modulation selector to 16 for consistency
+      modSelect.value = '16';
+      document.getElementById('modOrderRead').textContent = '16-QAM';
+      generate16QAMDemo({ fc: Number(carrierFreq.value), symbolRate: Number(symbolRate.value), samplesPerSymbol: 128, nsymbols: 100 });
+    });
+  }
+
   // Main simulation runner
   runBtn.addEventListener('click', ()=> {
     // ensure canvas is sized correctly (might have been hidden earlier)
     resizeWaveformCanvas();
     // start waveform if not already running
     waveformRunning = true;
-    sweepOffset = 0; // consistent starting phase
-    lastFrameTime = performance.now();
+    globalOSCTime = 0; // reset oscilloscope time
     // update RUN/STOP indicator buttons
     if (runIndicator && stopIndicator) {
       runIndicator.classList.add('active');
@@ -1744,11 +1902,8 @@ Channel & Timing:
     plotConstellation(constellation, txIQ, rxIQ);
     plotWaveform(cleanWave, noisyWave);
 
-    // zoom auto handler
-    zoomAuto.onclick = () => {
-      autoScaleEnabled = true;
-      updateCRODisplayIndicators();
-    };
+    // zoom auto handler (calls auto-scale routine that fits waveform)
+    zoomAuto.onclick = autoScaleCRO;
 
     // zoom in handler
     zoomIn.onclick = () => {
@@ -1787,18 +1942,22 @@ Channel & Timing:
   snrVal.textContent = '20';
   amplitude.value = 1;
   if (ampVal) ampVal.textContent = '1.0';
-  carrierFreq.value = 2000;
-  symbolRate.value = 2000;
-  cfVal.textContent = '2000';
-  srVal.textContent = '2000';
+  carrierFreq.value = 5;
+  symbolRate.value = 2;
+  cfVal.textContent = '5';
+  srVal.textContent = '2';
   bitCompare.innerHTML = '';
   detailedInfo.textContent = 'No simulation run yet.';
 
-  // reset slider fills
+  // reset slider fills (adjust for new kHz and symbol duration ranges)
   snrEl.style.backgroundSize = ((snrEl.value - 0)/(30-0))*100 + '% 100%';
   amplitude.style.backgroundSize = ((amplitude.value - 0.5)/(5-0.5))*100 + '% 100%';
-  carrierFreq.style.backgroundSize = ((carrierFreq.value - 500)/(5000-500))*100 + '% 100%';
-  symbolRate.style.backgroundSize = ((symbolRate.value - 500)/(5000-500))*100 + '% 100%';
+  carrierFreq.style.backgroundSize = ((carrierFreq.value - 0.5)/(10-0.5))*100 + '% 100%';
+  symbolRate.style.backgroundSize = ((symbolRate.value - 0.5)/(5-0.5))*100 + '% 100%';
+
+  // regenerate fresh 16-QAM symbols
+  generate16QAMSymbolSequence();
+  globalOSCTime = 0;
 
   Plotly.react(constellationDiv, [{x:[],y:[],mode:'markers'}],
     {...PLOTLY_DARK_THEME, title:{text:'Constellation Diagram',font:{color:'#00fff7'}}});
@@ -1809,8 +1968,8 @@ Channel & Timing:
   // update CRO display indicators
   updateCRODisplayIndicators();
 
-  // reset waveform sweep position and stop running
-  sweepOffset = 0;
+  // reset waveform and stop running
+  globalOSCTime = 0;
   waveformRunning = false;
   if (runIndicator && stopIndicator) {
     runIndicator.classList.remove('active');
@@ -1840,13 +1999,13 @@ Channel & Timing:
   // initial UI values
   snrVal.textContent = snrEl.value;
   if (ampVal) ampVal.textContent = amplitude.value;
-  if (cfVal) cfVal.textContent = carrierFreq.value;
-  if (srVal) srVal.textContent = symbolRate.value;
-  // set initial slider fill
+  if (cfVal) cfVal.textContent = '5';
+  if (srVal) srVal.textContent = '2';
+  // set initial slider fill (adjust for new kHz and symbol duration ranges)
   snrEl.style.backgroundSize = ((snrEl.value - 0)/(30-0))*100 + '% 100%';
   amplitude.style.backgroundSize = ((amplitude.value - 0.5)/(5-0.5))*100 + '% 100%';
-  carrierFreq.style.backgroundSize = ((carrierFreq.value - 500)/(5000-500))*100 + '% 100%';
-  symbolRate.style.backgroundSize = ((symbolRate.value - 500)/(5000-500))*100 + '% 100%';
+  carrierFreq.style.backgroundSize = ((carrierFreq.value - 0.5)/(10-0.5))*100 + '% 100%';
+  symbolRate.style.backgroundSize = ((symbolRate.value - 0.5)/(5-0.5))*100 + '% 100%';
   // initialize CRO display indicators
   updateCRODisplayIndicators();
 }); // DOMContentLoaded end
