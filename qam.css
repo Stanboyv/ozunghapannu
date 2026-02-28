@@ -2664,3 +2664,56 @@ footer {
     overflow: hidden;
 }
 
+/* ============================= */
+/* PROFESSIONAL CRO STYLE */
+/* ============================= */
+
+.cro-container {
+  background: #000;
+  border: 2px solid #00fff7;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.cro-display-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: #000;
+  overflow: hidden;
+}
+
+.cro-waveform-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+.cro-waveform-canvas:active {
+  cursor: grabbing;
+}
+
+.cro-channel-label {
+  font-weight: 800;
+  margin-right: 10px;
+}
+
+.ch1-label {
+  color: #00ff88;
+}
+
+.ch2-label {
+  color: #00eaff;
+}
+
+.cro-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
